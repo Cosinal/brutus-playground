@@ -148,7 +148,7 @@ export default function Home() {
             ) : (
               visibleCharts.map((chart) => {
                 const Component = chart.component;
-                return <Component key={chart.id} id={chart.id} {...(chart.props || {})} />;
+                return <Component key={chart.id} id={chart.id} filter={filter} {...(chart.props || {})} />;
               })
             )}
           </div>
