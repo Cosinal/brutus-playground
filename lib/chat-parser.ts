@@ -1,5 +1,5 @@
 export type ChartId = string;
-export type BoardMode = "default" | "profitability" | "production" | "skouries" | "liquidity";
+export type BoardMode = "default" | "profitability" | "growth" | "production" | "skouries" | "liquidity";
 
 export interface ChatMessage {
   role: "user" | "assistant";
@@ -42,6 +42,25 @@ export function parseIntent(query: string): ChartAction {
       mode: "profitability",
       response: "Switching to profitability analysis. Q2 2026: Realized gold $4,379/oz, AISC $1,926/oz → cash margin $2,453/oz. Operating mines FCF positive at $40.9M ex-growth; total FCF -$334.1M due to Skouries + McIlvenna Bay capex.",
       charts: ["profitability-company", "profitability-fcf", "profitability-mine", "profitability-metal", "profitability-revenue"],
+    };
+  }
+
+  // GROWTH MODE - Historical time horizon view
+  if (
+    q.includes("growth") ||
+    q.includes("historical") && !q.includes("add") ||
+    q.includes("over time") ||
+    q.includes("time horizon") ||
+    q.includes("history") && !q.includes("add") ||
+    q.includes("trend") && !q.includes("add") ||
+    q.includes("how has production grown") ||
+    q.includes("show me growth")
+  ) {
+    return {
+      type: "switch_mode",
+      mode: "growth",
+      response: "Switching to growth / historical view. Sourced data: Q1 2025–Q2 2026 quarterly production, FY 2025 annual (488 koz), FY 2026 guidance (495–600 koz). Revenue and FCF tracked where disclosed. No invented projections.",
+      charts: ["growth-production", "growth-annual", "growth-aisc", "growth-revenue-fcf", "growth-market"],
     };
   }
 
@@ -192,7 +211,7 @@ export function parseIntent(query: string): ChartAction {
     if (q.includes("production")) {
       return {
         type: "answer",
-        response: "Q2 2026 production: 104 koz gold (Lamaque 46, Kışladağ 32, Efemçukuru 15, Olympias 10, McIlvenna Bay 1). H1 2026 total: 204,974 oz. FY 2026 guidance: 495–600 koz. Source: Eldorado Gold Q2 2026 report.",
+        response: "Q2 2026 production: 104,616 oz gold (Lamaque 52,340; Kışladağ 19,108; Efemçukuru 18,019; Olympias 15,125). Skouries/McBay gold oz = 0 until commercial production reported. H1 2026 total: 204,974 oz. FY 2026 guidance: 495–600 koz. Source: Eldorado Gold Q2 2026 MD&A.",
       };
     }
   }

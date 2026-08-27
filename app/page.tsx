@@ -13,6 +13,11 @@ import {
   ProfitabilityByMineChart,
   ProfitabilityByMetalChart,
   ProfitabilityRevenueChart,
+  GrowthProductionByMineChart,
+  GrowthAnnualProductionChart,
+  GrowthAISCvsRealizedChart,
+  GrowthRevenueAndFCFChart,
+  GrowthMarketComparisonChart,
 } from "@/components/Charts";
 import { companyInfo, dataSources } from "@/data/eldorado-data";
 import { BoardMode } from "@/lib/chat-parser";
@@ -40,6 +45,14 @@ const profitabilityCharts: ChartConfig[] = [
   { id: "profitability-revenue", component: ProfitabilityRevenueChart, visible: true },
 ];
 
+const growthCharts: ChartConfig[] = [
+  { id: "growth-production", component: GrowthProductionByMineChart, visible: true },
+  { id: "growth-annual", component: GrowthAnnualProductionChart, visible: true },
+  { id: "growth-aisc", component: GrowthAISCvsRealizedChart, visible: true },
+  { id: "growth-revenue-fcf", component: GrowthRevenueAndFCFChart, visible: true },
+  { id: "growth-market", component: GrowthMarketComparisonChart, visible: true },
+];
+
 export default function Home() {
   const [mode, setMode] = useState<BoardMode>("default");
   const [charts, setCharts] = useState<ChartConfig[]>(defaultCharts);
@@ -54,6 +67,9 @@ export default function Home() {
       setMode(action.mode);
       if (action.mode === "profitability") {
         setCharts(profitabilityCharts);
+        setFilter(null);
+      } else if (action.mode === "growth") {
+        setCharts(growthCharts);
         setFilter(null);
       }
     } else if (action.type === "filter") {
@@ -81,6 +97,7 @@ export default function Home() {
 
   const getModeTitle = () => {
     if (mode === "profitability") return "Profitability — Q2 2026";
+    if (mode === "growth") return "Growth — Sourced History";
     return "Eldorado Gold Dashboard";
   };
 
@@ -107,6 +124,13 @@ export default function Home() {
                   <span>Realized: $4,379/oz</span>
                   <span>AISC: $1,926/oz</span>
                   <span>Margin: $2,453/oz</span>
+                </>
+              )}
+              {mode === "growth" && (
+                <>
+                  <span>Q1 2025–Q2 2026</span>
+                  <span>FY 2025: 488 koz</span>
+                  <span>FY 2026 Guidance: 495–600 koz</span>
                 </>
               )}
             </div>

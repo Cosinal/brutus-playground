@@ -16,8 +16,8 @@ export interface ProductionByMineData {
 
 export interface AISCVsGoldData {
   period: string;
-  aisc: number;
-  goldPrice: number;
+  aisc: number | null;
+  realized: number | null;
 }
 
 export interface AssetMixData {
@@ -34,70 +34,98 @@ export interface RampData {
   status: "on-track" | "achieved" | "delayed";
 }
 
+export interface AnnualProductionData {
+  year: string;
+  production: number;
+  isGuidance?: boolean;
+  guidanceLow?: number;
+  guidanceHigh?: number;
+}
+
+export interface RevenueAndFCFData {
+  period: string;
+  revenue: number | null;
+  fcf: number | null;
+  fcfExGrowth: number | null;
+  note?: string;
+}
+
+export interface MarketPriceData {
+  date: string;
+  EGO: number | null;
+  ELD_TO: number | null;
+  gold: number | null;
+}
+
 export const dataSources = {
-  asOf: "August 2026",
+  asOf: "2026-08-26",
   sources: [
-    "Eldorado Gold Q2 2026 Financial Results (eldoradogold.com/investors)",
+    "Eldorado Gold Q2 2026 News Release (2026-07-30)",
     "Q2 2026 MD&A filed on SEDAR+ and SEC EDGAR",
-    "Yahoo Finance for ELD.TO (TSX) and EGO (NYSE) market data",
-    "Kitco.com and TradingView for gold spot prices (USD/oz)",
+    "Q1 2026, Q4 2025, and earlier quarterly reports",
+    "Performance and Guidance at a Glance (eldoradogold.com)",
+    "Market data: Yahoo Finance ELD.TO (CAD), EGO (USD) as of 2026-08-26",
+  ],
+  notes: [
+    "All production figures in ounces (not koz) to preserve filing accuracy",
+    "AISC and realized gold price in USD per ounce",
+    "Skouries first concentrate EXPECTED Q3 2026 (not reported as of 2026-07-30)",
+    "McIlvenna Bay first copper 2026-06-07, commercial production EXPECTED Q3 2026",
+    "FCF-ex definition changed Q2 2026 to exclude both Skouries and McIlvenna Bay",
+    "Blanks indicate data not disclosed in public filings",
   ],
 };
 
-// Chart 5: ELD vs Gold Price (24 months)
-// Source: Yahoo Finance (ELD.TO in CAD), Kitco/TradingView (gold in USD/oz)
-// As of: August 2026
-export const priceData: PriceData[] = [
-  { date: "Aug 2024", eldPrice: 14.5, goldPrice: 2470 },
-  { date: "Sep 2024", eldPrice: 15.1, goldPrice: 2620 },
-  { date: "Oct 2024", eldPrice: 16.2, goldPrice: 2680 },
-  { date: "Nov 2024", eldPrice: 16.8, goldPrice: 2640 },
-  { date: "Dec 2024", eldPrice: 17.5, goldPrice: 2625 },
-  { date: "Jan 2025", eldPrice: 18.0, goldPrice: 2710 },
-  { date: "Feb 2025", eldPrice: 17.3, goldPrice: 2695 },
-  { date: "Mar 2025", eldPrice: 17.8, goldPrice: 2720 },
-  { date: "Apr 2025", eldPrice: 17.6, goldPrice: 2685 },
-  { date: "May 2025", eldPrice: 18.4, goldPrice: 2765 },
-  { date: "Jun 2025", eldPrice: 19.1, goldPrice: 2810 },
-  { date: "Jul 2025", eldPrice: 19.5, goldPrice: 2850 },
-  { date: "Aug 2025", eldPrice: 19.2, goldPrice: 2795 },
-  { date: "Sep 2025", eldPrice: 19.8, goldPrice: 2875 },
-  { date: "Oct 2025", eldPrice: 20.4, goldPrice: 2930 },
-  { date: "Nov 2025", eldPrice: 20.1, goldPrice: 2905 },
-  { date: "Dec 2025", eldPrice: 20.9, goldPrice: 2960 },
-  { date: "Jan 2026", eldPrice: 21.3, goldPrice: 2985 },
-  { date: "Feb 2026", eldPrice: 21.8, goldPrice: 3040 },
-  { date: "Mar 2026", eldPrice: 22.1, goldPrice: 3095 },
-  { date: "Apr 2026", eldPrice: 22.6, goldPrice: 3145 },
-  { date: "May 2026", eldPrice: 23.0, goldPrice: 3180 },
-  { date: "Jun 2026", eldPrice: 23.3, goldPrice: 3210 },
-  { date: "Jul 2026", eldPrice: 23.7, goldPrice: 3235 },
-];
+// Market price data for growth/time horizon views
+// Source: Yahoo Finance / Stooq CSV
+// Note: Yahoo v8 and Stooq both blocked by anti-bot protection from this VM
+// Market close 2026-08-26: ELD.TO 65.19 CAD, EGO 46.96 USD (sourced from Q2 2026 JSON)
+// No historical series available - do not invent
+export const marketPriceData: MarketPriceData[] = [];
 
-// Chart 1: Production by Mine (koz gold, Mlbs copper where material)
-// Source: Eldorado Gold Q2 2026 MD&A, quarterly production reports
-// As of: Q2 2026 (actual), Q3-Q4 2026 (projected per guidance)
+// Production by Mine (ounces, not koz)
+// Source: Eldorado Gold Q2 2026 MD&A and quarterly reports
+// As of: Q2 2026 (actual production data)
+// Note: Q3/Q4 2026 projections REMOVED - no invented figures
 export const productionByMine: ProductionByMineData[] = [
-  { quarter: "Q1 2025", lamaque: 42, kisladag: 28, efemcukuru: 18, olympias: 10, skouries: 0, mcilvenna: 0 },
-  { quarter: "Q2 2025", lamaque: 45, kisladag: 30, efemcukuru: 16, olympias: 13, skouries: 0, mcilvenna: 0 },
-  { quarter: "Q3 2025", lamaque: 48, kisladag: 34, efemcukuru: 20, olympias: 16, skouries: 0, mcilvenna: 0 },
-  { quarter: "Q4 2025", lamaque: 51, kisladag: 36, efemcukuru: 21, olympias: 17, skouries: 0, mcilvenna: 0 },
-  { quarter: "Q1 2026", lamaque: 43, kisladag: 30, efemcukuru: 17, olympias: 11, skouries: 0, mcilvenna: 0 },
-  { quarter: "Q2 2026", lamaque: 46, kisladag: 32, efemcukuru: 15, olympias: 10, skouries: 0, mcilvenna: 1 },
-  { quarter: "Q3 2026*", lamaque: 50, kisladag: 38, efemcukuru: 19, olympias: 13, skouries: 15, mcilvenna: 5 },
-  { quarter: "Q4 2026*", lamaque: 52, kisladag: 40, efemcukuru: 20, olympias: 14, skouries: 22, mcilvenna: 7 },
+  { quarter: "Q1 2025", lamaque: 40438, kisladag: 44319, efemcukuru: 19307, olympias: 11829, skouries: 0, mcilvenna: 0 },
+  { quarter: "Q2 2025", lamaque: 50640, kisladag: 46058, efemcukuru: 21093, olympias: 15978, skouries: 0, mcilvenna: 0 },
+  { quarter: "Q3 2025", lamaque: 46823, kisladag: 37184, efemcukuru: 17586, olympias: 13597, skouries: 0, mcilvenna: 0 },
+  { quarter: "Q4 2025", lamaque: 49307, kisladag: 41140, efemcukuru: 14496, olympias: 18473, skouries: 0, mcilvenna: 0 },
+  { quarter: "Q1 2026", lamaque: 42306, kisladag: 28339, efemcukuru: 15394, olympias: 14319, skouries: 0, mcilvenna: 0 },
+  { quarter: "Q2 2026", lamaque: 52340, kisladag: 19108, efemcukuru: 18019, olympias: 15125, skouries: 0, mcilvenna: 0 },
 ];
 
-// Chart 2: AISC vs Gold Price
-// Source: Eldorado Gold quarterly MD&As (AISC in USD/oz), Kitco (gold spot USD/oz)
+// Annual Production (sourced + FY 2026 guidance)
+// Source: Eldorado Gold annual reports and FY 2026 guidance
+// As of: Q2 2026 reporting
+export const annualProduction: AnnualProductionData[] = [
+  { year: "2025", production: 488268 },
+  { year: "2026 Guidance", production: 547500, isGuidance: true, guidanceLow: 495000, guidanceHigh: 600000 },
+];
+
+// AISC vs Realized Gold Price (quarterly, sourced only)
+// Source: Eldorado Gold quarterly MD&As
 // As of: Q2 2026
 export const aiscVsGold: AISCVsGoldData[] = [
-  { period: "Q1 2025", aisc: 1780, goldPrice: 2710 },
-  { period: "Q2 2025", aisc: 1820, goldPrice: 2765 },
-  { period: "Q3 2025", aisc: 1795, goldPrice: 2875 },
-  { period: "Q4 2025", aisc: 1810, goldPrice: 2960 },
-  { period: "Q1 2026", aisc: 1890, goldPrice: 3040 },
-  { period: "Q2 2026", aisc: 1926, goldPrice: 3180 },
+  { period: "Q1 2025", aisc: 1559, realized: 2933 },
+  { period: "Q2 2025", aisc: 1520, realized: 3270 },
+  { period: "Q3 2025", aisc: 1679, realized: null },
+  { period: "Q4 2025", aisc: 1894, realized: null },
+  { period: "Q1 2026", aisc: 1942, realized: 4891 },
+  { period: "Q2 2026", aisc: 1926, realized: 4379 },
+];
+
+// Revenue and Free Cash Flow (quarterly, sourced only)
+// Source: Eldorado Gold quarterly financial statements
+// As of: Q2 2026
+export const revenueAndFCF: RevenueAndFCFData[] = [
+  { period: "Q1 2025", revenue: 355.2, fcf: -29.4, fcfExGrowth: null },
+  { period: "Q2 2025", revenue: 451.7, fcf: -61.6, fcfExGrowth: null },
+  { period: "Q3 2025", revenue: 434.7, fcf: null, fcfExGrowth: null },
+  { period: "Q4 2025", revenue: 577.2, fcf: null, fcfExGrowth: null },
+  { period: "Q1 2026", revenue: 532.4, fcf: -129.1, fcfExGrowth: null },
+  { period: "Q2 2026", revenue: 487.5, fcf: -334.1, fcfExGrowth: 40.9, note: "FCF-ex excludes Skouries + McBay starting Q2 2026" },
 ];
 
 // Chart 4: Skouries & McIlvenna Bay Ramp Timeline
@@ -141,15 +169,15 @@ export const rampTimeline: RampData[] = [
   },
 ];
 
-// Chart 3: Asset Mix (Q2 2026 production by mine)
+// Asset Mix (Q2 2026 production by mine, sourced ounces)
 // Source: Eldorado Gold Q2 2026 quarterly report
 // As of: Q2 2026
+// Note: McBay gold production was 0 oz in Q2 2026 (only copper/zinc), removed from pie
 export const assetMix: AssetMixData[] = [
-  { mine: "Lamaque", q2_2026_production: 46, percentage: 44 },
-  { mine: "Kışladağ", q2_2026_production: 32, percentage: 31 },
-  { mine: "Efemçukuru", q2_2026_production: 15, percentage: 14 },
-  { mine: "Olympias", q2_2026_production: 10, percentage: 10 },
-  { mine: "McIlvenna Bay", q2_2026_production: 1, percentage: 1 },
+  { mine: "Lamaque", q2_2026_production: 52340, percentage: 50.0 },
+  { mine: "Kışladağ", q2_2026_production: 19108, percentage: 18.3 },
+  { mine: "Efemçukuru", q2_2026_production: 18019, percentage: 17.2 },
+  { mine: "Olympias", q2_2026_production: 15125, percentage: 14.5 },
 ];
 
 // Profitability Data
@@ -159,64 +187,64 @@ export const assetMix: AssetMixData[] = [
 export interface ProfitabilityCompanyData {
   period: string;
   revenue: number; // $M USD
-  realizedGold: number; // $/oz
-  tcc: number; // $/oz Total Cash Cost
+  realizedGold: number | null; // $/oz
+  tcc: number | null; // $/oz Total Cash Cost
   aisc: number; // $/oz All-In Sustaining Cost
   adjEbitda: number | null; // $M USD
   netIncome: number | null; // $M USD
-  fcf: number; // $M USD Free Cash Flow
-  fcfExGrowth: number; // $M USD FCF excluding Skouries + McIlvenna Bay
+  fcf: number | null; // $M USD Free Cash Flow
+  fcfExGrowth: number | null; // $M USD FCF excluding Skouries + McIlvenna Bay
 }
 
 export interface ProfitabilityMineData {
   mine: string;
   country: string;
   q2_2026_production_oz: number;
-  tcc: number; // $/oz
+  tcc: number | null; // $/oz
   aisc: number; // $/oz
 }
 
 export interface ProfitabilityMetalData {
   period: string;
-  goldRevenue: number; // $M USD
-  otherRevenue: number; // $M USD (copper, zinc, silver)
+  goldRevenue: number | null; // $M USD
+  otherRevenue: number | null; // $M USD (copper, zinc, silver)
   totalRevenue: number; // $M USD
 }
 
 export interface ProfitabilitySegmentData {
   period: string;
   segment: string;
-  fcf: number; // $M USD
+  fcf: number | null; // $M USD
 }
 
 export const profitabilityCompany: ProfitabilityCompanyData[] = [
-  { period: "Q1 2025", revenue: 387.2, realizedGold: 3950, tcc: 1280, aisc: 1780, adjEbitda: 142.5, netIncome: 48.2, fcf: 65.3, fcfExGrowth: 85.1 },
-  { period: "Q2 2025", revenue: 401.8, realizedGold: 4050, tcc: 1310, aisc: 1820, adjEbitda: 158.7, netIncome: 52.6, fcf: 71.2, fcfExGrowth: 89.8 },
-  { period: "Q3 2025", revenue: 428.5, realizedGold: 4180, tcc: 1295, aisc: 1795, adjEbitda: 178.3, netIncome: 68.4, fcf: 88.7, fcfExGrowth: 105.2 },
-  { period: "Q4 2025", revenue: 445.2, realizedGold: 4240, tcc: 1305, aisc: 1810, adjEbitda: 185.9, netIncome: 72.1, fcf: 92.4, fcfExGrowth: 108.6 },
-  { period: "Q1 2026", revenue: 465.3, realizedGold: 4285, tcc: 1365, aisc: 1890, adjEbitda: 172.8, netIncome: 58.9, fcf: -98.5, fcfExGrowth: 38.2 },
-  { period: "Q2 2026", revenue: 487.5, realizedGold: 4379, tcc: 1388, aisc: 1926, adjEbitda: 168.4, netIncome: 52.7, fcf: -334.1, fcfExGrowth: 40.9 },
+  { period: "Q1 2025", revenue: 355.2, realizedGold: 2933, tcc: null, aisc: 1559, adjEbitda: null, netIncome: null, fcf: -29.4, fcfExGrowth: null },
+  { period: "Q2 2025", revenue: 451.7, realizedGold: 3270, tcc: null, aisc: 1520, adjEbitda: null, netIncome: null, fcf: -61.6, fcfExGrowth: null },
+  { period: "Q3 2025", revenue: 434.7, realizedGold: null, tcc: null, aisc: 1679, adjEbitda: null, netIncome: null, fcf: null, fcfExGrowth: null },
+  { period: "Q4 2025", revenue: 577.2, realizedGold: null, tcc: null, aisc: 1894, adjEbitda: null, netIncome: null, fcf: null, fcfExGrowth: null },
+  { period: "Q1 2026", revenue: 532.4, realizedGold: 4891, tcc: null, aisc: 1942, adjEbitda: null, netIncome: null, fcf: -129.1, fcfExGrowth: null },
+  { period: "Q2 2026", revenue: 487.5, realizedGold: 4379, tcc: 1432, aisc: 1926, adjEbitda: null, netIncome: null, fcf: -334.1, fcfExGrowth: 40.9 },
 ];
 
 export const profitabilityByMine: ProfitabilityMineData[] = [
-  { mine: "Lamaque", country: "Canada", q2_2026_production_oz: 46000, tcc: 850, aisc: 1192 },
-  { mine: "Kışladağ", country: "Türkiye", q2_2026_production_oz: 32000, tcc: 1750, aisc: 2407 },
-  { mine: "Efemçukuru", country: "Türkiye", q2_2026_production_oz: 15000, tcc: 1620, aisc: 2252 },
-  { mine: "Olympias", country: "Greece", q2_2026_production_oz: 10000, tcc: 1850, aisc: 2465 },
+  { mine: "Lamaque", country: "Canada", q2_2026_production_oz: 52340, tcc: 865, aisc: 1192 },
+  { mine: "Kışladağ", country: "Türkiye", q2_2026_production_oz: 19108, tcc: null, aisc: 2407 },
+  { mine: "Efemçukuru", country: "Türkiye", q2_2026_production_oz: 18019, tcc: null, aisc: 2252 },
+  { mine: "Olympias", country: "Greece", q2_2026_production_oz: 15125, tcc: null, aisc: 2465 },
 ];
 
 export const profitabilityByMetal: ProfitabilityMetalData[] = [
-  { period: "Q1 2025", goldRevenue: 363.5, otherRevenue: 23.7, totalRevenue: 387.2 },
-  { period: "Q2 2025", goldRevenue: 378.2, otherRevenue: 23.6, totalRevenue: 401.8 },
-  { period: "Q3 2025", goldRevenue: 404.8, otherRevenue: 23.7, totalRevenue: 428.5 },
-  { period: "Q4 2025", goldRevenue: 420.3, otherRevenue: 24.9, totalRevenue: 445.2 },
-  { period: "Q1 2026", goldRevenue: 432.1, otherRevenue: 33.2, totalRevenue: 465.3 },
+  { period: "Q1 2025", goldRevenue: null, otherRevenue: null, totalRevenue: 355.2 },
+  { period: "Q2 2025", goldRevenue: null, otherRevenue: null, totalRevenue: 451.7 },
+  { period: "Q3 2025", goldRevenue: null, otherRevenue: null, totalRevenue: 434.7 },
+  { period: "Q4 2025", goldRevenue: null, otherRevenue: null, totalRevenue: 577.2 },
+  { period: "Q1 2026", goldRevenue: null, otherRevenue: null, totalRevenue: 532.4 },
   { period: "Q2 2026", goldRevenue: 449.7, otherRevenue: 37.8, totalRevenue: 487.5 },
 ];
 
 export const profitabilityBySegment: ProfitabilitySegmentData[] = [
-  { period: "Q1 2026", segment: "Operating Mines", fcf: 38.2 },
-  { period: "Q1 2026", segment: "Growth Projects (Skouries + McBay)", fcf: -136.7 },
+  { period: "Q1 2026", segment: "Operating Mines", fcf: null },
+  { period: "Q1 2026", segment: "Growth Projects (Skouries + McBay)", fcf: null },
   { period: "Q2 2026", segment: "Operating Mines", fcf: 40.9 },
   { period: "Q2 2026", segment: "Growth Projects (Skouries + McBay)", fcf: -375.0 },
 ];
