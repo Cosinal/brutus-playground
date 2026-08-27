@@ -46,12 +46,13 @@ import {
 
 interface ChartProps {
   id: string;
+  filter?: string | null;
 }
 
 const COLORS = ["#f59e0b", "#10b981", "#3b82f6", "#8b5cf6", "#ef4444", "#ec4899"];
 
 // Chart 1: Production by Mine
-export function ProductionByMineChart({ id }: ChartProps) {
+export function ProductionByMineChart({ id, filter }: ChartProps) {
   // Convert ounces to koz for display
   const dataInKoz = productionByMine.map(d => ({
     quarter: d.quarter,
@@ -62,6 +63,22 @@ export function ProductionByMineChart({ id }: ChartProps) {
     skouries: (d.skouries / 1000),
     mcilvenna: (d.mcilvenna / 1000),
   }));
+
+  // Define which mines to show based on filter
+  const shouldShow = (mine: string) => {
+    if (!filter) return true;
+    
+    const mineLower = mine.toLowerCase();
+    if (filter === "lamaque") return mineLower === "lamaque";
+    if (filter === "skouries") return mineLower === "skouries";
+    if (filter === "canada") return mineLower === "lamaque" || mineLower === "mcilvenna";
+    if (filter === "turkiye") return mineLower === "kisladag" || mineLower === "efemcukuru";
+    if (filter === "greece") return mineLower === "olympias" || mineLower === "skouries";
+    if (filter === "exclude-canada") return mineLower !== "lamaque" && mineLower !== "mcilvenna";
+    if (filter === "exclude-turkiye") return mineLower !== "kisladag" && mineLower !== "efemcukuru";
+    if (filter === "exclude-greece") return mineLower !== "olympias" && mineLower !== "skouries";
+    return true;
+  };
 
   return (
     <div id={id} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
@@ -78,12 +95,12 @@ export function ProductionByMineChart({ id }: ChartProps) {
             formatter={(value: any) => value.toFixed(1)}
           />
           <Legend />
-          <Bar dataKey="lamaque" stackId="a" fill="#f59e0b" name="Lamaque" />
-          <Bar dataKey="kisladag" stackId="a" fill="#10b981" name="Kışladağ" />
-          <Bar dataKey="efemcukuru" stackId="a" fill="#3b82f6" name="Efemçukuru" />
-          <Bar dataKey="olympias" stackId="a" fill="#8b5cf6" name="Olympias" />
-          <Bar dataKey="skouries" stackId="a" fill="#ef4444" name="Skouries" />
-          <Bar dataKey="mcilvenna" stackId="a" fill="#ec4899" name="McIlvenna Bay" />
+          {shouldShow("lamaque") && <Bar dataKey="lamaque" stackId="a" fill="#f59e0b" name="Lamaque" />}
+          {shouldShow("kisladag") && <Bar dataKey="kisladag" stackId="a" fill="#10b981" name="Kışladağ" />}
+          {shouldShow("efemcukuru") && <Bar dataKey="efemcukuru" stackId="a" fill="#3b82f6" name="Efemçukuru" />}
+          {shouldShow("olympias") && <Bar dataKey="olympias" stackId="a" fill="#8b5cf6" name="Olympias" />}
+          {shouldShow("skouries") && <Bar dataKey="skouries" stackId="a" fill="#ef4444" name="Skouries" />}
+          {shouldShow("mcilvenna") && <Bar dataKey="mcilvenna" stackId="a" fill="#ec4899" name="McIlvenna Bay" />}
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -91,7 +108,7 @@ export function ProductionByMineChart({ id }: ChartProps) {
 }
 
 // Chart 2: AISC vs Realized Gold Price
-export function AISCvsGoldChart({ id }: ChartProps) {
+export function AISCvsGoldChart({ id, filter }: ChartProps) {
   return (
     <div id={id} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
       <h3 className="text-lg font-semibold mb-2 text-zinc-100">AISC vs Realized Gold Price (USD/oz)</h3>
@@ -118,7 +135,37 @@ export function AISCvsGoldChart({ id }: ChartProps) {
 }
 
 // Chart 3: Asset Mix (Q2 2026)
-export function AssetMixChart({ id }: ChartProps) {
+export function AssetMixChart({ id, filter }: ChartProps) {
+  // Filter data based on filter prop
+  const getFilteredData = () => {
+    if (!filter) return assetMix;
+    
+    // Use profitabilityByMine to determine country for future-proofing (e.g., if McIlvenna Bay added to assetMix)
+    const canadianMines = profitabilityByMine.filter(m => m.country === "Canada").map(m => m.mine);
+    const turkiyeMines = profitabilityByMine.filter(m => m.country === "Türkiye").map(m => m.mine);
+    const greeceMines = profitabilityByMine.filter(m => m.country === "Greece").map(m => m.mine);
+    
+    if (filter === "lamaque") return assetMix.filter(m => m.mine === "Lamaque");
+    if (filter === "skouries") return assetMix.filter(m => m.mine === "Skouries");
+    if (filter === "canada") return assetMix.filter(m => canadianMines.includes(m.mine));
+    if (filter === "turkiye") return assetMix.filter(m => turkiyeMines.includes(m.mine));
+    if (filter === "greece") return assetMix.filter(m => greeceMines.includes(m.mine));
+    if (filter === "exclude-canada") return assetMix.filter(m => !canadianMines.includes(m.mine));
+    if (filter === "exclude-turkiye") return assetMix.filter(m => !turkiyeMines.includes(m.mine));
+    if (filter === "exclude-greece") return assetMix.filter(m => !greeceMines.includes(m.mine));
+    
+    return assetMix;
+  };
+
+  const filteredData = getFilteredData();
+  
+  // Recalculate percentages so filtered slices sum to 100%
+  const totalProduction = filteredData.reduce((sum, item) => sum + item.q2_2026_production, 0);
+  const dataWithRecalculatedPercentages = filteredData.map(item => ({
+    ...item,
+    percentage: totalProduction > 0 ? parseFloat(((item.q2_2026_production / totalProduction) * 100).toFixed(1)) : 0,
+  }));
+
   return (
     <div id={id} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
       <h3 className="text-lg font-semibold mb-2 text-zinc-100">Asset Mix — Q2 2026 Production</h3>
@@ -126,7 +173,7 @@ export function AssetMixChart({ id }: ChartProps) {
       <ResponsiveContainer width="100%" height={280}>
         <PieChart>
           <Pie
-            data={assetMix}
+            data={dataWithRecalculatedPercentages}
             cx="50%"
             cy="50%"
             labelLine={false}
@@ -135,14 +182,14 @@ export function AssetMixChart({ id }: ChartProps) {
             fill="#8884d8"
             dataKey="percentage"
           >
-            {assetMix.map((entry, index) => (
+            {dataWithRecalculatedPercentages.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
           <Tooltip
             contentStyle={{ backgroundColor: "#18181b", border: "1px solid #3f3f46" }}
             formatter={(value: any, name: string, props: any) => [
-              `${props.payload.q2_2026_production_oz} oz (${value}%)`,
+              `${props.payload.q2_2026_production} oz (${value}%)`,
               props.payload.mine,
             ]}
           />
@@ -153,7 +200,7 @@ export function AssetMixChart({ id }: ChartProps) {
 }
 
 // Chart 4: Ramp Timeline
-export function RampTimelineChart({ id }: ChartProps) {
+export function RampTimelineChart({ id, filter }: ChartProps) {
   return (
     <div id={id} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
       <h3 className="text-lg font-semibold mb-2 text-zinc-100">Skouries & McIlvenna Bay Ramp</h3>
@@ -209,7 +256,6 @@ export function ELDvsGoldChart({ id }: ChartProps) {
   
   // Generate colors for each ticker
   const colors = ["#f59e0b", "#10b981", "#eab308", "#3b82f6", "#8b5cf6"];
-
   return (
     <div id={id} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
       <h3 className="text-lg font-semibold mb-2 text-zinc-100">5-Year Market Performance</h3>
@@ -263,7 +309,7 @@ export function ELDvsGoldChart({ id }: ChartProps) {
 
 // PROFITABILITY MODE CHARTS
 
-export function ProfitabilityCompanyChart({ id }: ChartProps) {
+export function ProfitabilityCompanyChart({ id, filter }: ChartProps) {
   return (
     <div id={id} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
       <h3 className="text-lg font-semibold mb-2 text-zinc-100">Company Profitability Trend</h3>
@@ -287,7 +333,7 @@ export function ProfitabilityCompanyChart({ id }: ChartProps) {
   );
 }
 
-export function ProfitabilityFCFChart({ id }: ChartProps) {
+export function ProfitabilityFCFChart({ id, filter }: ChartProps) {
   return (
     <div id={id} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
       <h3 className="text-lg font-semibold mb-2 text-zinc-100">Free Cash Flow: Operating vs Growth</h3>
@@ -310,63 +356,85 @@ export function ProfitabilityFCFChart({ id }: ChartProps) {
   );
 }
 
-export function ProfitabilityByMineChart({ id }: ChartProps) {
+export function ProfitabilityByMineChart({ id, filter }: ChartProps) {
+  // Helper to determine if a mine should be shown
+  const shouldShowMine = (country: string, mine: string) => {
+    if (!filter) return true;
+    
+    const mineLower = mine.toLowerCase();
+    if (filter === "lamaque") return mineLower === "lamaque";
+    if (filter === "skouries") return false; // Skouries not in Q2 2026 profitability (no production)
+    if (filter === "canada") return country === "Canada";
+    if (filter === "turkiye") return country === "Türkiye";
+    if (filter === "greece") return country === "Greece";
+    if (filter === "exclude-canada") return country !== "Canada";
+    if (filter === "exclude-turkiye") return country !== "Türkiye";
+    if (filter === "exclude-greece") return country !== "Greece";
+    return true;
+  };
+
   return (
     <div id={id} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
       <h3 className="text-lg font-semibold mb-2 text-zinc-100">Q2 2026 AISC by Mine & Country</h3>
       <p className="text-xs text-zinc-500 mb-4">Source: Eldorado Gold Q2 2026 MD&A | All figures USD/oz</p>
       <div className="space-y-4">
-        <div>
-          <div className="text-sm font-medium text-zinc-400 mb-2">Canada</div>
-          {profitabilityByMine.filter(m => m.country === "Canada").map((mine, idx) => (
-            <div key={idx} className="flex items-center justify-between p-3 bg-zinc-800 rounded border border-zinc-700 mb-2">
-              <div className="flex-1">
-                <div className="font-medium text-zinc-100">{mine.mine}</div>
-                <div className="text-sm text-zinc-400">Production: {(mine.q2_2026_production_oz / 1000).toFixed(1)} koz</div>
+        {shouldShowMine("Canada", "Lamaque") && (
+          <div>
+            <div className="text-sm font-medium text-zinc-400 mb-2">Canada</div>
+            {profitabilityByMine.filter(m => m.country === "Canada").map((mine, idx) => (
+              <div key={idx} className="flex items-center justify-between p-3 bg-zinc-800 rounded border border-zinc-700 mb-2">
+                <div className="flex-1">
+                  <div className="font-medium text-zinc-100">{mine.mine}</div>
+                  <div className="text-sm text-zinc-400">Production: {(mine.q2_2026_production_oz / 1000).toFixed(1)} koz</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm text-zinc-400">TCC: {mine.tcc ? `$${mine.tcc}` : 'N/A'}</div>
+                  <div className="font-medium text-zinc-100">AISC: ${mine.aisc}</div>
+                </div>
               </div>
-              <div className="text-right">
-                <div className="text-sm text-zinc-400">TCC: {mine.tcc ? `$${mine.tcc}` : 'N/A'}</div>
-                <div className="font-medium text-zinc-100">AISC: ${mine.aisc}</div>
+            ))}
+          </div>
+        )}
+        {shouldShowMine("Türkiye", "Kışladağ") && (
+          <div>
+            <div className="text-sm font-medium text-zinc-400 mb-2">Türkiye</div>
+            {profitabilityByMine.filter(m => m.country === "Türkiye").map((mine, idx) => (
+              <div key={idx} className="flex items-center justify-between p-3 bg-zinc-800 rounded border border-zinc-700 mb-2">
+                <div className="flex-1">
+                  <div className="font-medium text-zinc-100">{mine.mine}</div>
+                  <div className="text-sm text-zinc-400">Production: {(mine.q2_2026_production_oz / 1000).toFixed(1)} koz</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm text-zinc-400">TCC: {mine.tcc ? `$${mine.tcc}` : 'N/A'}</div>
+                  <div className="font-medium text-zinc-100">AISC: ${mine.aisc}</div>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-        <div>
-          <div className="text-sm font-medium text-zinc-400 mb-2">Türkiye</div>
-          {profitabilityByMine.filter(m => m.country === "Türkiye").map((mine, idx) => (
-            <div key={idx} className="flex items-center justify-between p-3 bg-zinc-800 rounded border border-zinc-700 mb-2">
-              <div className="flex-1">
-                <div className="font-medium text-zinc-100">{mine.mine}</div>
-                <div className="text-sm text-zinc-400">Production: {(mine.q2_2026_production_oz / 1000).toFixed(1)} koz</div>
+            ))}
+          </div>
+        )}
+        {shouldShowMine("Greece", "Olympias") && (
+          <div>
+            <div className="text-sm font-medium text-zinc-400 mb-2">Greece</div>
+            {profitabilityByMine.filter(m => m.country === "Greece").map((mine, idx) => (
+              <div key={idx} className="flex items-center justify-between p-3 bg-zinc-800 rounded border border-zinc-700 mb-2">
+                <div className="flex-1">
+                  <div className="font-medium text-zinc-100">{mine.mine}</div>
+                  <div className="text-sm text-zinc-400">Production: {(mine.q2_2026_production_oz / 1000).toFixed(1)} koz</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm text-zinc-400">TCC: {mine.tcc ? `$${mine.tcc}` : 'N/A'}</div>
+                  <div className="font-medium text-zinc-100">AISC: ${mine.aisc}</div>
+                </div>
               </div>
-              <div className="text-right">
-                <div className="text-sm text-zinc-400">TCC: {mine.tcc ? `$${mine.tcc}` : 'N/A'}</div>
-                <div className="font-medium text-zinc-100">AISC: ${mine.aisc}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div>
-          <div className="text-sm font-medium text-zinc-400 mb-2">Greece</div>
-          {profitabilityByMine.filter(m => m.country === "Greece").map((mine, idx) => (
-            <div key={idx} className="flex items-center justify-between p-3 bg-zinc-800 rounded border border-zinc-700 mb-2">
-              <div className="flex-1">
-                <div className="font-medium text-zinc-100">{mine.mine}</div>
-                <div className="text-sm text-zinc-400">Production: {(mine.q2_2026_production_oz / 1000).toFixed(1)} koz</div>
-              </div>
-              <div className="text-right">
-                <div className="text-sm text-zinc-400">TCC: {mine.tcc ? `$${mine.tcc}` : 'N/A'}</div>
-                <div className="font-medium text-zinc-100">AISC: ${mine.aisc}</div>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-export function ProfitabilityByMetalChart({ id }: ChartProps) {
+export function ProfitabilityByMetalChart({ id, filter }: ChartProps) {
   return (
     <div id={id} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
       <h3 className="text-lg font-semibold mb-2 text-zinc-100">Revenue by Metal</h3>
@@ -389,7 +457,7 @@ export function ProfitabilityByMetalChart({ id }: ChartProps) {
   );
 }
 
-export function ProfitabilityRevenueChart({ id }: ChartProps) {
+export function ProfitabilityRevenueChart({ id, filter }: ChartProps) {
   return (
     <div id={id} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
       <h3 className="text-lg font-semibold mb-2 text-zinc-100">Revenue & Earnings Trend</h3>
@@ -415,7 +483,7 @@ export function ProfitabilityRevenueChart({ id }: ChartProps) {
 
 // GROWTH MODE CHARTS
 
-export function GrowthProductionByMineChart({ id }: ChartProps) {
+export function GrowthProductionByMineChart({ id, filter }: ChartProps) {
   // Convert ounces to koz for display
   const dataInKoz = productionByMine.map(d => ({
     quarter: d.quarter,
@@ -425,6 +493,22 @@ export function GrowthProductionByMineChart({ id }: ChartProps) {
     olympias: (d.olympias / 1000),
     total: ((d.lamaque + d.kisladag + d.efemcukuru + d.olympias) / 1000),
   }));
+
+  // Define which mines to show based on filter
+  const shouldShow = (mine: string) => {
+    if (!filter) return true;
+    
+    const mineLower = mine.toLowerCase();
+    if (filter === "lamaque") return mineLower === "lamaque";
+    if (filter === "skouries") return false; // Skouries not in historical data yet
+    if (filter === "canada") return mineLower === "lamaque";
+    if (filter === "turkiye") return mineLower === "kisladag" || mineLower === "efemcukuru";
+    if (filter === "greece") return mineLower === "olympias";
+    if (filter === "exclude-canada") return mineLower !== "lamaque";
+    if (filter === "exclude-turkiye") return mineLower !== "kisladag" && mineLower !== "efemcukuru";
+    if (filter === "exclude-greece") return mineLower !== "olympias";
+    return true;
+  };
 
   return (
     <div id={id} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
@@ -441,10 +525,10 @@ export function GrowthProductionByMineChart({ id }: ChartProps) {
             formatter={(value: any) => value.toFixed(1) + ' koz'}
           />
           <Legend />
-          <Bar dataKey="lamaque" stackId="a" fill="#f59e0b" name="Lamaque" />
-          <Bar dataKey="kisladag" stackId="a" fill="#10b981" name="Kışladağ" />
-          <Bar dataKey="efemcukuru" stackId="a" fill="#3b82f6" name="Efemçukuru" />
-          <Bar dataKey="olympias" stackId="a" fill="#8b5cf6" name="Olympias" />
+          {shouldShow("lamaque") && <Bar dataKey="lamaque" stackId="a" fill="#f59e0b" name="Lamaque" />}
+          {shouldShow("kisladag") && <Bar dataKey="kisladag" stackId="a" fill="#10b981" name="Kışladağ" />}
+          {shouldShow("efemcukuru") && <Bar dataKey="efemcukuru" stackId="a" fill="#3b82f6" name="Efemçukuru" />}
+          {shouldShow("olympias") && <Bar dataKey="olympias" stackId="a" fill="#8b5cf6" name="Olympias" />}
         </BarChart>
       </ResponsiveContainer>
       <div className="mt-3 text-sm text-zinc-400">
@@ -454,7 +538,7 @@ export function GrowthProductionByMineChart({ id }: ChartProps) {
   );
 }
 
-export function GrowthAnnualProductionChart({ id }: ChartProps) {
+export function GrowthAnnualProductionChart({ id, filter }: ChartProps) {
   const dataInKoz = annualProduction.map(d => ({
     year: d.year,
     production: d.production / 1000,
@@ -491,7 +575,7 @@ export function GrowthAnnualProductionChart({ id }: ChartProps) {
   );
 }
 
-export function GrowthAISCvsRealizedChart({ id }: ChartProps) {
+export function GrowthAISCvsRealizedChart({ id, filter }: ChartProps) {
   return (
     <div id={id} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
       <h3 className="text-lg font-semibold mb-2 text-zinc-100">AISC vs Realized Gold — Margin History</h3>
@@ -517,7 +601,7 @@ export function GrowthAISCvsRealizedChart({ id }: ChartProps) {
   );
 }
 
-export function GrowthRevenueAndFCFChart({ id }: ChartProps) {
+export function GrowthRevenueAndFCFChart({ id, filter }: ChartProps) {
   return (
     <div id={id} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
       <h3 className="text-lg font-semibold mb-2 text-zinc-100">Revenue & Free Cash Flow Over Time</h3>
@@ -544,7 +628,7 @@ export function GrowthRevenueAndFCFChart({ id }: ChartProps) {
   );
 }
 
-export function GrowthMarketComparisonChart({ id }: ChartProps) {
+export function GrowthMarketComparisonChart({ id, filter }: ChartProps) {
   // Hide chart if no real market data available
   if (marketPriceData.length === 0) {
     return (
