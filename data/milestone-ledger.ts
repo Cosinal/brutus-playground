@@ -7,7 +7,7 @@ export interface MilestoneEntry {
   category: "production" | "ramp" | "cost" | "guidance";
   priorExpected: string | null;
   latestPrinted: string | null;
-  status: "expected" | "achieved" | "slipped" | "unchanged";
+  status: "expected" | "achieved" | "slipped" | "unchanged" | "updated" | "maintained";
   source: string;
   sourceDate: string;
   sourceUrl?: string;
@@ -72,15 +72,26 @@ export const milestoneLedger: MilestoneEntry[] = [
     notes: "Nameplate 4,900 tpd confirmed June 8, 2026 NR. Prior unsourced 2,750 tpd removed.",
   },
   {
-    metric: "FY 2026 production guidance",
+    metric: "Operating mines (ex-Skouries, ex-McBay) FY 2026 gold production",
     category: "guidance",
-    priorExpected: "495–600 koz gold",
-    latestPrinted: "495–600 koz (unchanged)",
-    status: "unchanged",
-    source: "Q2 2026 MD&A and News Release",
+    priorExpected: "430,000–490,000 oz",
+    latestPrinted: "430,000–490,000 oz",
+    status: "maintained",
+    source: "Q2 2026 News Release",
     sourceDate: "2026-07-30",
     sourceUrl: "https://www.sec.gov/Archives/edgar/data/0000918608/000091860826000022/ego6-k20260730nr.htm",
-    notes: "FY 2026 guidance reaffirmed at 495–600 koz in Q2 2026 MD&A",
+    notes: "\"Excluding Skouries and McIlvenna Bay, the Company is maintaining its annual gold production guidance of 430,000 to 490,000 ounces\" (Q2 2026 NR)",
+  },
+  {
+    metric: "Consolidated FY 2026 gold production guidance",
+    category: "guidance",
+    priorExpected: "490,000–590,000 oz",
+    latestPrinted: "495,000–600,000 oz",
+    status: "updated",
+    source: "Q2 2026 News Release",
+    sourceDate: "2026-07-30",
+    sourceUrl: "https://www.sec.gov/Archives/edgar/data/0000918608/000091860826000022/ego6-k20260730nr.htm",
+    notes: "\"The Company is updating its consolidated 2026 annual gold production guidance to 495,000 to 600,000 ounces, reflecting the addition of initial gold production from McIlvenna Bay.\" Prior: 490,000–590,000 oz (Q1 2026 NR 2026-04-30 / Feb 19 2026 guidance)",
   },
   {
     metric: "H1 2026 production",
@@ -151,13 +162,16 @@ export function getMilestonesDiff(): MilestoneEntry[] {
 
 // Data sourcing notes
 export const milestoneLedgerMeta = {
-  asOf: "2026-08-27",
+  asOf: "Q2 2026 6-K (2026-07-30)",
   source: "SEC EDGAR 6-K filings and Eldorado Gold news releases",
   notes: [
     "All milestones sourced from public filings (no confidential data)",
     "Expected milestones are guidance from latest filing (Q2 2026 MD&A)",
     "Achieved milestones confirmed in news releases or MD&As",
     "Slipped milestones show where guidance moved vs prior quarter",
+    "Updated milestones show guidance changes vs prior filing",
+    "Maintained milestones show guidance reaffirmed",
     "Blanks (null) mean no prior guidance or no latest print",
+    "Later 6-Ks not parsed",
   ],
 };

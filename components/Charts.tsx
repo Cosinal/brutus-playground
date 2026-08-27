@@ -235,6 +235,10 @@ export function ExpectedVsAchievedChart({ id, filter }: ChartProps) {
                     ? "bg-blue-900 text-blue-200"
                     : item.status === "slipped"
                     ? "bg-red-900 text-red-200"
+                    : item.status === "updated"
+                    ? "bg-yellow-900 text-yellow-200"
+                    : item.status === "maintained"
+                    ? "bg-blue-900 text-blue-200"
                     : "bg-zinc-700 text-zinc-300"
                 }`}
               >
@@ -242,6 +246,8 @@ export function ExpectedVsAchievedChart({ id, filter }: ChartProps) {
                 {item.status === "expected" && "Expected"}
                 {item.status === "slipped" && "Slipped"}
                 {item.status === "unchanged" && "Unchanged"}
+                {item.status === "updated" && "Updated"}
+                {item.status === "maintained" && "Maintained"}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3 text-sm mt-2">
@@ -261,7 +267,7 @@ export function ExpectedVsAchievedChart({ id, filter }: ChartProps) {
         ))}
       </div>
       <div className="mt-4 text-xs text-zinc-600">
-        Latest filing: Q2 2026 6-K (2026-07-30). All milestones sourced from public filings.
+        Ledger as-of: {milestoneLedgerMeta.asOf}; later 6-Ks not parsed. All milestones sourced from public filings.
       </div>
     </div>
   );
