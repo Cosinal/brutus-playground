@@ -2,6 +2,8 @@
 
 **By Jorden Shaw**
 
+**Live Dashboard:** https://brutus-playground-xrz5.vercel.app
+
 A conversational investment decision dashboard for Eldorado Gold Corporation (TSX: ELD, NYSE: EGO) with **sourced historical data** and **growth/time-horizon analysis**.
 
 ## Investment Thesis
