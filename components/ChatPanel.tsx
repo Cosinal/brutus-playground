@@ -1,18 +1,17 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ChatMessage, parseIntent, BoardMode } from "@/lib/chat-parser";
+import { ChatMessage, parseIntent } from "@/lib/chat-parser";
 
 interface ChatPanelProps {
   onChartAction: (action: any) => void;
-  currentMode: BoardMode;
 }
 
-export default function ChatPanel({ onChartAction, currentMode }: ChatPanelProps) {
+export default function ChatPanel({ onChartAction }: ChatPanelProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content: "Ask about profitability, production, costs—or tell me to filter/modify/add/remove charts. Try: 'what was profitability', 'show only Lamaque', or 'reset'.",
+      content: "Ask about Q2 2026 data, Skouries/McBay status, or tell me to filter/add/remove charts. All answers from public filings only.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -45,9 +44,6 @@ export default function ChatPanel({ onChartAction, currentMode }: ChatPanelProps
     <div className="bg-zinc-900 rounded-lg border border-zinc-800 flex flex-col h-full">
       <div className="p-4 border-b border-zinc-800">
         <h3 className="text-lg font-semibold text-zinc-100">Chat</h3>
-        {currentMode !== "default" && (
-          <div className="text-xs text-blue-400 mt-1">Mode: {currentMode}</div>
-        )}
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -76,7 +72,7 @@ export default function ChatPanel({ onChartAction, currentMode }: ChatPanelProps
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Try: 'what was profitability' or 'show only Lamaque'"
+            placeholder="Try: 'what is Q2 AISC' or 'has Skouries produced'"
             className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <button

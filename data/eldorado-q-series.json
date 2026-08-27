@@ -1,0 +1,158 @@
+{
+  "asOf": "2026-08-26",
+  "sources": [
+    "Eldorado Gold Q2 2026 News Release (2026-07-30): https://www.eldoradogold.com/investors/news-releases/eldorado-gold-reports-solid-q2-2026-financial-and-operational-results",
+    "Q2 2026 MD&A PDF",
+    "Q1 2026 News Release",
+    "Q4 2025 Operations Data PDF",
+    "Skouries First Ore Crushed News Release",
+    "Performance and Guidance at a Glance",
+    "Yahoo Finance: ELD.TO (CAD) and EGO (USD) as of 2026-08-26"
+  ],
+  "reportingCurrency": "USD",
+  "notes": [
+    "AISC = USD per ounce SOLD, by-product credits, non-IFRS measure",
+    "ELD.TO quoted in CAD; EGO quoted in USD",
+    "Skouries: First concentrate EXPECTED Q3 2026 (not yet reported as of 2026-07-30)",
+    "McIlvenna Bay: First copper 2026-06-07, commercial EXPECTED Q3 2026 (not yet achieved)",
+    "FCF-ex definition changed in Q2 2026 to exclude both Skouries and McIlvenna Bay",
+    "Blank cells indicate data not disclosed in public filings"
+  ],
+  "market": {
+    "date": "2026-08-26",
+    "ELD_TO": {
+      "price_CAD": 65.19,
+      "change_pct": -1.97,
+      "marketCap_CAD_B": 17.002,
+      "52w_low_CAD": 32.77,
+      "52w_high_CAD": 69.46
+    },
+    "EGO": {
+      "price_USD": 46.96,
+      "change_pct": -2.45,
+      "marketCap_USD_B": 12.248,
+      "52w_low_USD": 23.81,
+      "52w_high_USD": 51.16
+    },
+    "gold_futures_COMEX": 4690.6,
+    "note": "COMEX GC=F is futures, not LBMA, not company realized price"
+  },
+  "sharesOutstanding": {
+    "Q2_2026_end": 261318643,
+    "Q2_2026_wtd_avg_basic": 251453420,
+    "note": "Foran acquisition closed 2026-04-14, added 64,668,321 shares"
+  },
+  "guidance_2026": {
+    "consolidated_gold_koz": "495–600",
+    "existing_four_mines_koz": "430–490",
+    "TCC_per_oz": "1220–1420",
+    "AISC_per_oz": "1670–1870",
+    "AISC_note": "Four existing mines only; excludes Skouries and McIlvenna Bay",
+    "Skouries_Au_koz": "60–100",
+    "Skouries_Cu_Mlb": "20–40",
+    "McBay_Cu_Mlb": "5–10",
+    "McBay_Zn_kt": "3–6",
+    "McBay_Au_koz": "5–10",
+    "McBay_Ag_koz": "100–200"
+  },
+  "production_by_mine_oz": {
+    "Q1_2025": { "Lamaque": 40438, "Kisladag": 44319, "Efemcukuru": 19307, "Olympias": 11829, "total": 115893 },
+    "Q2_2025": { "Lamaque": 50640, "Kisladag": 46058, "Efemcukuru": 21093, "Olympias": 15978, "total": 133769 },
+    "Q3_2025": { "Lamaque": 46823, "Kisladag": 37184, "Efemcukuru": 17586, "Olympias": 13597, "total": 115190 },
+    "Q4_2025": { "Lamaque": 49307, "Kisladag": 41140, "Efemcukuru": 14496, "Olympias": 18473, "total": 123416 },
+    "FY_2025": { "Lamaque": 187208, "Kisladag": 168701, "Efemcukuru": 72482, "Olympias": 59877, "total": 488268 },
+    "Q1_2026": { "Lamaque": 42306, "Kisladag": 28339, "Efemcukuru": 15394, "Olympias": 14319, "total": 100358 },
+    "Q2_2026": { "Lamaque": 52340, "Kisladag": 19108, "Efemcukuru": 18019, "Olympias": 15125, "total": 104616 },
+    "H1_2026": { "Lamaque": 94646, "Kisladag": 47447, "Efemcukuru": 33413, "Olympias": 29444, "total": 204974 }
+  },
+  "AISC_and_realized": {
+    "Q1_2025": { "AISC": 1559, "realized": 2933 },
+    "Q2_2025": { "AISC": 1520, "realized": 3270 },
+    "Q3_2025": { "AISC": 1679, "realized": null },
+    "Q4_2025": { "AISC": 1894, "realized": null },
+    "FY_2025": { "AISC": 1664, "realized": null },
+    "Q1_2026": { "AISC": 1942, "realized": 4891 },
+    "Q2_2026": { "AISC": 1926, "realized": 4379 },
+    "H1_2026": { "AISC": 1934, "realized": 4632 }
+  },
+  "AISC_by_mine_Q2_2026": {
+    "Lamaque": 1192,
+    "Kisladag": 2407,
+    "Efemcukuru": 2252,
+    "Olympias": 2465,
+    "corporate_allocation": 130
+  },
+  "H1_2026_production_mix": {
+    "Lamaque_pct": 46,
+    "Kisladag_pct": 23,
+    "Efemcukuru_pct": 16,
+    "Olympias_pct": 14
+  },
+  "financials_M_USD": {
+    "Q1_2025": { "revenue": 355.2, "FCF": -29.4, "cash": 978.1, "debt": 932.8 },
+    "Q2_2025": { "revenue": 451.7, "FCF": -61.6, "cash": 1078.6, "debt": 1157.1 },
+    "Q3_2025": { "revenue": 434.7, "FCF": null, "cash": null, "debt": null },
+    "Q4_2025": { "revenue": 577.2, "FCF": null, "cash": 869.4, "debt": 1275.1 },
+    "FY_2025": { "revenue": 1818.9, "FCF": null, "cash": 869.4, "debt": 1275.1 },
+    "Q1_2026": { "revenue": 532.4, "FCF": -129.1, "cash": 629.7, "debt": 1230.8 },
+    "Q2_2026": { 
+      "revenue": 487.5, 
+      "FCF": -334.1, 
+      "FCF_ex_growth": 40.9,
+      "note": "FCF-ex definition changed in Q2 2026 to exclude both Skouries and McIlvenna Bay (previously only Skouries)",
+      "cash": 554.6, 
+      "debt": 1749.9 
+    },
+    "H1_2026": { 
+      "revenue": 1019.9, 
+      "FCF": -463.2, 
+      "FCF_ex_growth": 103.8,
+      "cash": 554.6, 
+      "debt": 1749.9 
+    }
+  },
+  "Q2_2026_summary": {
+    "produced_oz": 104616,
+    "sold_oz": 102691,
+    "realized_per_oz": 4379,
+    "TCC_per_oz": 1432,
+    "AISC_per_oz": 1926,
+    "revenue_M": 487.5,
+    "FCF_M": -334.1,
+    "FCF_ex_growth_M": 40.9,
+    "cash_M": 554.6,
+    "debt_M": 1749.9
+  },
+  "FY_2025_summary": {
+    "produced_oz": 488268,
+    "AISC_per_oz": 1664,
+    "revenue_M": 1818.9
+  },
+  "project_status": {
+    "Skouries": {
+      "status": "Commissioning (97% complete as of 2026-06-30)",
+      "first_concentrate": "EXPECTED Q3 2026 (not yet reported as of 2026-07-30)",
+      "commercial_production": "EXPECTED Q4 2026",
+      "milestones": [
+        "First ore crushed July 2026 on temporary power",
+        "Final grid energization still required",
+        "First concentrate NOT yet shipped as of 2026-07-30"
+      ]
+    },
+    "McIlvenna_Bay": {
+      "status": "Ramping (not yet commercial)",
+      "first_copper": "2026-06-07 (achieved)",
+      "first_zinc": "July 2026 (achieved)",
+      "commercial_production": "EXPECTED Q3 2026 (not yet achieved)",
+      "Q2_2026_output": "5,405 tonnes processed → 65,398 payable Cu lb",
+      "note": "Not in AISC denominator until commercial production"
+    }
+  },
+  "mine_locations_NI43-101": {
+    "Kisladag": { "lat": 38.48222, "lon": 29.14944 },
+    "Efemcukuru": { "lat": 38.29211, "lon": 26.97508 },
+    "Lamaque_Triangle": { "lat": 48.07722, "lon": -77.73444 },
+    "Lamaque_Ormaque": { "lat": 48.09306, "lon": -77.74583 },
+    "Olympias": { "lat": 40.60, "lon": 23.83 }
+  }
+}
