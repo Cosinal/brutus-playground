@@ -8,8 +8,14 @@ import {
   AssetMixChart,
   RampTimelineChart,
   ELDvsGoldChart,
+  ProfitabilityMarginChart,
+  ProfitabilityByMineChart,
+  ProfitabilityByMetalChart,
+  ProfitabilityFCFChart,
 } from "@/components/Charts";
 import { companyInfo, dataSources, q2_2026 } from "@/data/eldorado-data";
+
+type BoardMode = "default" | "profitability";
 
 interface ChartConfig {
   id: string;
@@ -26,14 +32,29 @@ const defaultCharts: ChartConfig[] = [
   { id: "market", component: ELDvsGoldChart, visible: true },
 ];
 
+const profitabilityCharts: ChartConfig[] = [
+  { id: "prof-margin", component: ProfitabilityMarginChart, visible: true },
+  { id: "prof-mine", component: ProfitabilityByMineChart, visible: true },
+  { id: "prof-metal", component: ProfitabilityByMetalChart, visible: true },
+  { id: "prof-fcf", component: ProfitabilityFCFChart, visible: true },
+];
+
 export default function Home() {
+  const [mode, setMode] = useState<BoardMode>("default");
   const [charts, setCharts] = useState<ChartConfig[]>(defaultCharts);
   const [filter, setFilter] = useState<string | null>(null);
 
   const handleChartAction = (action: any) => {
     if (action.type === "reset") {
+      setMode("default");
       setCharts(defaultCharts);
       setFilter(null);
+    } else if (action.type === "switch_mode") {
+      if (action.mode === "profitability") {
+        setMode("profitability");
+        setCharts(profitabilityCharts);
+        setFilter(null);
+      }
     } else if (action.type === "filter") {
       setFilter(action.target);
     } else if (action.type === "remove") {
@@ -61,21 +82,38 @@ export default function Home() {
 
   const visibleCharts = charts.filter((c) => c.visible);
 
+  const getModeTitle = () => {
+    if (mode === "profitability") return "Profitability — Q2 2026";
+    return "Jorden Shaw / Eldorado Gold Dashboard";
+  };
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       <header className="border-b border-zinc-800 bg-zinc-900 sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold">Jorden Shaw / Eldorado Gold Dashboard</h1>
+              <h1 className="text-xl sm:text-2xl font-bold">{getModeTitle()}</h1>
               <div className="text-xs text-zinc-500 mt-1">
                 {companyInfo.tickers} | As of {dataSources.asOf}
               </div>
             </div>
             <div className="text-xs sm:text-sm text-zinc-400 flex flex-wrap gap-3">
-              <span>H1 2026: {companyInfo.h1_2026_production}</span>
-              <span>Q2 AISC: ${q2_2026.aisc_per_oz}/oz</span>
-              <span>Q2 Margin: ${q2_2026.margin_per_oz}/oz</span>
+              {mode === "default" && (
+                <>
+                  <span>H1 2026: {companyInfo.h1_2026_production}</span>
+                  <span>Q2 AISC: ${q2_2026.aisc_per_oz}/oz</span>
+                  <span>Q2 Margin: ${q2_2026.margin_per_oz}/oz</span>
+                </>
+              )}
+              {mode === "profitability" && (
+                <>
+                  <span>Realized: ${q2_2026.realized_per_oz}/oz</span>
+                  <span>AISC: ${q2_2026.aisc_per_oz}/oz</span>
+                  <span>Margin: ${q2_2026.margin_per_oz}/oz</span>
+                  <span>Ops FCF: $40.9M</span>
+                </>
+              )}
             </div>
           </div>
         </div>

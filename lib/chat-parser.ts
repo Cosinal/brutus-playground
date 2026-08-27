@@ -1,4 +1,5 @@
 export type ChartId = string;
+export type BoardMode = "default" | "profitability";
 
 export interface ChatMessage {
   role: "user" | "assistant";
@@ -6,10 +7,11 @@ export interface ChatMessage {
 }
 
 export interface ChartAction {
-  type: "filter" | "modify" | "add" | "remove" | "answer" | "reset";
+  type: "filter" | "modify" | "add" | "remove" | "answer" | "reset" | "switch_mode";
   target?: string;
   params?: Record<string, any>;
   response: string;
+  mode?: BoardMode;
 }
 
 export function parseIntent(query: string): ChartAction {
@@ -19,7 +21,32 @@ export function parseIntent(query: string): ChartAction {
   if (q.includes("reset") || q.includes("show the full dashboard") || q.includes("default dashboard")) {
     return {
       type: "reset",
+      mode: "default",
       response: "Resetting to the default 5-chart dashboard.",
+    };
+  }
+
+  // PROFITABILITY MODE - Question takes over the board
+  if (
+    q.includes("profitability") ||
+    q.includes("profitable") ||
+    q.includes("what was profit") ||
+    q.includes("how profitable") ||
+    q.includes("earnings") ||
+    q.includes("how did they make money")
+  ) {
+    return {
+      type: "switch_mode",
+      mode: "profitability",
+      response: "Switching to profitability mode. Q2 2026: Realized $4,379/oz minus AISC $1,926/oz = $2,453/oz margin. Operating mines FCF +$40.9M; Skouries + McBay growth capex -$375M; total FCF -$334.1M.",
+    };
+  }
+
+  // Services question (not supported)
+  if (q.includes("services") && (q.includes("segment") || q.includes("business") || q.includes("profitability"))) {
+    return {
+      type: "answer",
+      response: "Eldorado Gold does not report a 'services' segment in public filings. The company breaks out: (1) mine-level AISC/TCC, (2) country groups (Canada/Türkiye/Greece), (3) metal revenue (gold vs Cu/Zn/Ag), and (4) operating mines vs growth projects (Skouries + McBay). Ask about those instead.",
     };
   }
 

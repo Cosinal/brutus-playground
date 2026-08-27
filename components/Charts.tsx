@@ -265,3 +265,174 @@ export function ELDvsGoldChart({ id }: ChartProps) {
     </div>
   );
 }
+
+// PROFITABILITY MODE CHARTS
+
+export function ProfitabilityMarginChart({ id }: ChartProps) {
+  return (
+    <div id={id} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
+      <h3 className="text-lg font-semibold mb-2 text-zinc-100">Company Margin (Realized minus AISC)</h3>
+      <p className="text-xs text-zinc-500 mb-4">
+        Source: Eldorado Gold quarterly MD&As | As of {dataSources.asOf}
+      </p>
+      <ResponsiveContainer width="100%" height={280}>
+        <ComposedChart data={aiscVsRealized.filter(d => d.realized !== null)}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+          <XAxis dataKey="period" stroke="#888" />
+          <YAxis stroke="#888" label={{ value: 'USD/oz', angle: -90, position: 'insideLeft', style: { fill: '#888' } }} />
+          <Tooltip
+            contentStyle={{ backgroundColor: "#18181b", border: "1px solid #3f3f46" }}
+            labelStyle={{ color: "#e4e4e7" }}
+          />
+          <Legend />
+          <Line type="monotone" dataKey="realized" stroke="#eab308" name="Realized Gold" strokeWidth={2} />
+          <Line type="monotone" dataKey="aisc" stroke="#ef4444" name="AISC" strokeWidth={2} />
+          <Bar 
+            dataKey={(d: any) => d.realized - d.aisc} 
+            fill="#10b981" 
+            name="Margin (Realized - AISC)" 
+            opacity={0.3}
+          />
+        </ComposedChart>
+      </ResponsiveContainer>
+      <div className="mt-3 text-sm text-zinc-400">
+        Q2 2026: Realized ${q2_2026.realized_per_oz}/oz − AISC ${q2_2026.aisc_per_oz}/oz = <span className="text-green-400 font-medium">${q2_2026.margin_per_oz}/oz margin</span>
+      </div>
+    </div>
+  );
+}
+
+export function ProfitabilityByMineChart({ id }: ChartProps) {
+  const mineData = [
+    { mine: "Lamaque", country: "Canada", aisc: 1192, tcc: 850 },
+    { mine: "Kışladağ", country: "Türkiye", aisc: 2407, tcc: 1750 },
+    { mine: "Efemçukuru", country: "Türkiye", aisc: 2252, tcc: 1620 },
+    { mine: "Olympias", country: "Greece", aisc: 2465, tcc: 1850 },
+  ];
+
+  return (
+    <div id={id} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
+      <h3 className="text-lg font-semibold mb-2 text-zinc-100">Q2 2026 AISC & TCC by Mine</h3>
+      <p className="text-xs text-zinc-500 mb-4">
+        Source: Eldorado Gold Q2 2026 MD&A | All figures USD/oz | Plus $130 corporate allocation
+      </p>
+      <div className="space-y-4">
+        <div>
+          <div className="text-sm font-medium text-zinc-400 mb-2">Canada</div>
+          {mineData.filter(m => m.country === "Canada").map((mine, idx) => (
+            <div key={idx} className="p-3 bg-zinc-800 rounded border border-zinc-700 mb-2">
+              <div className="flex items-center justify-between">
+                <div className="font-medium text-zinc-100">{mine.mine}</div>
+                <div className="text-right">
+                  <div className="text-sm text-zinc-400">TCC: ${mine.tcc}</div>
+                  <div className="font-medium text-zinc-100">AISC: ${mine.aisc}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div>
+          <div className="text-sm font-medium text-zinc-400 mb-2">Türkiye</div>
+          {mineData.filter(m => m.country === "Türkiye").map((mine, idx) => (
+            <div key={idx} className="p-3 bg-zinc-800 rounded border border-zinc-700 mb-2">
+              <div className="flex items-center justify-between">
+                <div className="font-medium text-zinc-100">{mine.mine}</div>
+                <div className="text-right">
+                  <div className="text-sm text-zinc-400">TCC: ${mine.tcc}</div>
+                  <div className="font-medium text-zinc-100">AISC: ${mine.aisc}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div>
+          <div className="text-sm font-medium text-zinc-400 mb-2">Greece</div>
+          {mineData.filter(m => m.country === "Greece").map((mine, idx) => (
+            <div key={idx} className="p-3 bg-zinc-800 rounded border border-zinc-700 mb-2">
+              <div className="flex items-center justify-between">
+                <div className="font-medium text-zinc-100">{mine.mine}</div>
+                <div className="text-right">
+                  <div className="text-sm text-zinc-400">TCC: ${mine.tcc}</div>
+                  <div className="font-medium text-zinc-100">AISC: ${mine.aisc}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function ProfitabilityByMetalChart({ id }: ChartProps) {
+  const metalData = [
+    { metal: "Gold", revenue: 449.7, pct: 92 },
+    { metal: "Other (Cu/Zn/Ag)", revenue: 37.8, pct: 8 },
+  ];
+
+  return (
+    <div id={id} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
+      <h3 className="text-lg font-semibold mb-2 text-zinc-100">Q2 2026 Revenue by Metal</h3>
+      <p className="text-xs text-zinc-500 mb-4">
+        Source: Eldorado Gold Q2 2026 MD&A | Gold $449.7M of $487.5M total, Other $37.8M (Cu/Zn/Ag)
+      </p>
+      <ResponsiveContainer width="100%" height={280}>
+        <PieChart>
+          <Pie
+            data={metalData}
+            cx="50%"
+            cy="50%"
+            labelLine={false}
+            label={({ metal, pct, revenue }) => `${metal} $${revenue}M (${pct}%)`}
+            outerRadius={100}
+            fill="#8884d8"
+            dataKey="revenue"
+          >
+            <Cell fill="#eab308" />
+            <Cell fill="#f97316" />
+          </Pie>
+          <Tooltip
+            contentStyle={{ backgroundColor: "#18181b", border: "1px solid #3f3f46" }}
+            formatter={(value: any) => [`$${value}M`, ""]}
+          />
+        </PieChart>
+      </ResponsiveContainer>
+      <div className="mt-3 text-xs text-zinc-400">
+        Total Q2 2026 revenue: $487.5M USD. McIlvenna Bay copper/zinc ramping; Skouries Cu-Au expected Q3-Q4.
+      </div>
+    </div>
+  );
+}
+
+export function ProfitabilityFCFChart({ id }: ChartProps) {
+  const fcfData = [
+    { segment: "Operating Mines", fcf: 40.9 },
+    { segment: "Growth (Skouries + McBay)", fcf: -375.0 },
+    { segment: "Total", fcf: -334.1 },
+  ];
+
+  return (
+    <div id={id} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
+      <h3 className="text-lg font-semibold mb-2 text-zinc-100">Q2 2026 Free Cash Flow: Operating vs Growth</h3>
+      <p className="text-xs text-zinc-500 mb-4">
+        Source: Eldorado Gold Q2 2026 MD&A | FCF-ex definition changed Q2 to exclude both Skouries and McBay
+      </p>
+      <ResponsiveContainer width="100%" height={280}>
+        <BarChart data={fcfData} layout="vertical">
+          <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+          <XAxis type="number" stroke="#888" label={{ value: '$M USD', position: 'insideBottom', offset: -5, style: { fill: '#888' } }} />
+          <YAxis type="category" dataKey="segment" stroke="#888" width={180} />
+          <Tooltip
+            contentStyle={{ backgroundColor: "#18181b", border: "1px solid #3f3f46" }}
+            labelStyle={{ color: "#e4e4e7" }}
+            formatter={(value: any) => [`$${value}M`, "FCF"]}
+          />
+          <Bar dataKey="fcf" fill="#10b981" name="FCF ($M)" />
+        </BarChart>
+      </ResponsiveContainer>
+      <div className="mt-3 text-sm text-zinc-400">
+        Operating mines FCF positive at $40.9M. Growth projects (Skouries + McBay commissioning/ramp) consuming $375M capex. Total: -$334.1M.
+      </div>
+    </div>
+  );
+}
