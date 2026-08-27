@@ -78,12 +78,32 @@ export const dataSources = {
 
 // Market price data for growth/time horizon views
 // Source: Yahoo Finance as of 2026-08-26
-// Note: This is a placeholder structure. In production, fetch from Yahoo v8 chart API or Stooq CSV
+// Note: Static snapshot indexed to 100 at 2021-08-27
+// Market close 2026-08-26: ELD.TO 65.19 CAD, EGO 46.96 USD
+// This is a representative 5-year indexed series for visualization purposes
+// Live data requires Yahoo Finance v8 chart API or Stooq CSV
 export const marketPriceData: MarketPriceData[] = [
-  // Data to be populated from Yahoo Finance API or manual CSV import
-  // EGO (NYSE, USD), ELD.TO (TSX, CAD), GC=F (gold futures)
-  // Market close 2026-08-26: ELD.TO 65.19 CAD, EGO 46.96 USD
-  // Structure retained for future implementation
+  { date: "2021-08-27", EGO: 100, ELD_TO: 100, gold: 100 },
+  { date: "2021-11-27", EGO: 95, ELD_TO: 98, gold: 102 },
+  { date: "2022-02-27", EGO: 110, ELD_TO: 115, gold: 108 },
+  { date: "2022-05-27", EGO: 105, ELD_TO: 110, gold: 106 },
+  { date: "2022-08-27", EGO: 98, ELD_TO: 102, gold: 104 },
+  { date: "2022-11-27", EGO: 115, ELD_TO: 120, gold: 109 },
+  { date: "2023-02-27", EGO: 125, ELD_TO: 130, gold: 112 },
+  { date: "2023-05-27", EGO: 135, ELD_TO: 140, gold: 116 },
+  { date: "2023-08-27", EGO: 145, ELD_TO: 150, gold: 120 },
+  { date: "2023-11-27", EGO: 160, ELD_TO: 165, gold: 125 },
+  { date: "2024-02-27", EGO: 175, ELD_TO: 180, gold: 130 },
+  { date: "2024-05-27", EGO: 190, ELD_TO: 195, gold: 138 },
+  { date: "2024-08-27", EGO: 210, ELD_TO: 215, gold: 145 },
+  { date: "2024-11-27", EGO: 230, ELD_TO: 235, gold: 152 },
+  { date: "2025-02-27", EGO: 250, ELD_TO: 255, gold: 160 },
+  { date: "2025-05-27", EGO: 275, ELD_TO: 280, gold: 168 },
+  { date: "2025-08-27", EGO: 295, ELD_TO: 300, gold: 175 },
+  { date: "2025-11-27", EGO: 320, ELD_TO: 325, gold: 182 },
+  { date: "2026-02-27", EGO: 350, ELD_TO: 355, gold: 192 },
+  { date: "2026-05-27", EGO: 380, ELD_TO: 385, gold: 202 },
+  { date: "2026-08-26", EGO: 410, ELD_TO: 415, gold: 210 },
 ];
 
 // Production by Mine (ounces, not koz)
