@@ -124,9 +124,10 @@ See `data/packs/eldorado-operations.ts` as a reference. This is **manual sourcin
 
 ## Features
 
-- **Default board**: Market history + operations (if pack exists)
+- **Default board**: Market history + operations (if pack exists) + Expected vs Achieved milestones
 - **Profitability mode**: Margins, FCF, mine-level costs (if pack exists)
 - **Growth mode**: Historical time-series production, AISC, revenue/FCF (if pack exists)
+- **Filings mode**: Expected vs Achieved / What Changed board (diffs prior guidance vs latest 6-K)
 - **Conversational chat**: Pattern-based intent parser (no LLM API keys required)
 - **Responsive design**: Works on desktop, tablet, mobile
 
@@ -240,6 +241,7 @@ Try these commands in the chat panel:
 ### Mode Switching
 - **"profitability"** – Margins, FCF, mine-level costs
 - **"growth"** or **"historical growth"** – Time-series production, AISC, revenue/FCF
+- **"filings"** or **"what changed"** – Expected vs Achieved / filings-diff board
 - **"reset"** – Return to default dashboard
 
 ### Filters and Modifications

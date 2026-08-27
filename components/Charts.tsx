@@ -44,6 +44,13 @@ import {
   companyInfo,
 } from "@/data/packs/eldorado-operations";
 
+// Milestone ledger for filings-diff / expected-vs-achieved
+import {
+  milestoneLedger,
+  latestFilings,
+  milestoneLedgerMeta,
+} from "@/data/milestone-ledger";
+
 interface ChartProps {
   id: string;
   filter?: string | null;
@@ -199,7 +206,69 @@ export function AssetMixChart({ id, filter }: ChartProps) {
   );
 }
 
-// Chart 4: Ramp Timeline
+// Chart 4: Expected vs Achieved — Filings Diff
+export function ExpectedVsAchievedChart({ id, filter }: ChartProps) {
+  return (
+    <div id={id} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
+      <h3 className="text-lg font-semibold mb-2 text-zinc-100">Expected vs Achieved — Filings Diff</h3>
+      <p className="text-xs text-zinc-500 mb-4">
+        Source: SEC 6-K filings (Q2 2026 MD&A 2026-07-30, McBay NR 2026-06-08) | Public data only
+      </p>
+      <div className="space-y-3">
+        {milestoneLedger.map((item, idx) => (
+          <div key={idx} className="p-3 bg-zinc-800 rounded border border-zinc-700">
+            <div className="flex items-start justify-between mb-2">
+              <div className="flex-1">
+                <div className="font-medium text-zinc-100">{item.metric}</div>
+                <div className="text-xs text-zinc-500 mt-1">
+                  {item.category === "ramp" && "Ramp Milestone"}
+                  {item.category === "production" && "Production"}
+                  {item.category === "cost" && "Cost Metric"}
+                  {item.category === "guidance" && "Guidance"}
+                </div>
+              </div>
+              <div
+                className={`px-3 py-1 rounded text-xs font-medium whitespace-nowrap ${
+                  item.status === "achieved"
+                    ? "bg-green-900 text-green-200"
+                    : item.status === "expected"
+                    ? "bg-blue-900 text-blue-200"
+                    : item.status === "slipped"
+                    ? "bg-red-900 text-red-200"
+                    : "bg-zinc-700 text-zinc-300"
+                }`}
+              >
+                {item.status === "achieved" && "✓ Achieved"}
+                {item.status === "expected" && "Expected"}
+                {item.status === "slipped" && "Slipped"}
+                {item.status === "unchanged" && "Unchanged"}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-sm mt-2">
+              <div>
+                <div className="text-xs text-zinc-500">Prior Expected</div>
+                <div className="text-zinc-200 mt-1">{item.priorExpected || "—"}</div>
+              </div>
+              <div>
+                <div className="text-xs text-zinc-500">Latest Printed</div>
+                <div className="text-zinc-200 mt-1">{item.latestPrinted || "—"}</div>
+              </div>
+            </div>
+            <div className="text-xs text-zinc-500 mt-2">
+              {item.source} ({item.sourceDate})
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 text-xs text-zinc-600">
+        Latest filing: Q2 2026 6-K (2026-07-30). All milestones sourced from public filings.
+      </div>
+    </div>
+  );
+}
+
+// Chart 4 (Legacy): Ramp Timeline - DEPRECATED in favor of ExpectedVsAchievedChart
+// Kept for backward compatibility but not used in default board
 export function RampTimelineChart({ id, filter }: ChartProps) {
   return (
     <div id={id} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">

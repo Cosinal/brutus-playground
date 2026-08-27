@@ -1,5 +1,5 @@
 export type ChartId = string;
-export type BoardMode = "default" | "profitability" | "growth" | "production" | "skouries" | "liquidity";
+export type BoardMode = "default" | "profitability" | "growth" | "filings" | "production" | "skouries" | "liquidity";
 
 export interface ChatMessage {
   role: "user" | "assistant";
@@ -61,6 +61,25 @@ export function parseIntent(query: string): ChartAction {
       mode: "growth",
       response: "Switching to growth / historical view. Sourced data: Q1 2025–Q2 2026 quarterly production, FY 2025 annual (488 koz), FY 2026 guidance (495–600 koz). Revenue and FCF tracked where disclosed. No invented projections.",
       charts: ["growth-production", "growth-annual", "growth-aisc", "growth-revenue-fcf", "growth-market"],
+    };
+  }
+
+  // FILINGS MODE - Expected vs Achieved / What Changed
+  if (
+    q.includes("filings") ||
+    q.includes("what changed") ||
+    q.includes("expected vs achieved") ||
+    q.includes("did skouries slip") ||
+    q.includes("did mcbay slip") ||
+    q.includes("mcilvenna bay") && q.includes("slip") ||
+    q.includes("milestone") && !q.includes("add") ||
+    q.includes("expected vs actual")
+  ) {
+    return {
+      type: "switch_mode",
+      mode: "filings",
+      response: "Switching to filings-diff / expected-vs-achieved view. Latest: Q2 2026 6-K (2026-07-30). Skouries first concentrate EXPECTED Q3 2026 (not achieved). McBay first copper ACHIEVED 2026-06-07 (June 8 NR). McBay commercial EXPECTED Q3 2026. All milestones sourced from public 6-K filings and news releases.",
+      charts: ["expected-achieved"],
     };
   }
 
