@@ -1,8 +1,165 @@
 {
   "asOf": "2026-08-27",
-  "source": "SEC EDGAR company facts API (fetch blocked from VM)",
+  "source": "SEC EDGAR company facts API (IFRS)",
   "cik": "0000918608",
   "companyName": "Eldorado Gold Corp",
-  "note": "SEC API blocked from this VM. Run scripts/fetch-sec-financials.py from a local machine with SEC access.",
-  "metrics": {}
+  "framework": "ifrs-full",
+  "note": "FCF not a tagged IFRS fact; omitted rather than computed. Operating cash flow from continuing operations (40-F filings).",
+  "metrics": {
+    "Revenues": [
+      {
+        "period": "2017-12-31",
+        "fiscalYear": "2017",
+        "value": 391406000,
+        "units": "USD",
+        "form": "40-F"
+      },
+      {
+        "period": "2018-12-31",
+        "fiscalYear": "2018",
+        "value": 459016000,
+        "units": "USD",
+        "form": "40-F"
+      },
+      {
+        "period": "2019-12-31",
+        "fiscalYear": "2019",
+        "value": 617823000,
+        "units": "USD",
+        "form": "40-F"
+      },
+      {
+        "period": "2020-12-31",
+        "fiscalYear": "2020",
+        "value": 1026685000,
+        "units": "USD",
+        "form": "40-F"
+      },
+      {
+        "period": "2021-12-31",
+        "fiscalYear": "2021",
+        "value": 940914000,
+        "units": "USD",
+        "form": "40-F"
+      },
+      {
+        "period": "2022-12-31",
+        "fiscalYear": "2022",
+        "value": 871984000,
+        "units": "USD",
+        "form": "40-F"
+      },
+      {
+        "period": "2023-12-31",
+        "fiscalYear": "2023",
+        "value": 1008501000,
+        "units": "USD",
+        "form": "40-F"
+      },
+      {
+        "period": "2024-12-31",
+        "fiscalYear": "2024",
+        "value": 1322581000,
+        "units": "USD",
+        "form": "40-F"
+      },
+      {
+        "period": "2025-12-31",
+        "fiscalYear": "2025",
+        "value": 1818856000,
+        "units": "USD",
+        "form": "40-F"
+      }
+    ],
+    "NetIncome": [
+      {
+        "period": "2016-12-31",
+        "fiscalYear": "2016",
+        "value": -346876000,
+        "units": "USD",
+        "form": "40-F"
+      },
+      {
+        "period": "2017-12-31",
+        "fiscalYear": "2017",
+        "value": -21388000,
+        "units": "USD",
+        "form": "40-F"
+      },
+      {
+        "period": "2018-12-31",
+        "fiscalYear": "2018",
+        "value": -379631000,
+        "units": "USD",
+        "form": "40-F"
+      },
+      {
+        "period": "2019-12-31",
+        "fiscalYear": "2019",
+        "value": 73685000,
+        "units": "USD",
+        "form": "40-F"
+      },
+      {
+        "period": "2020-12-31",
+        "fiscalYear": "2020",
+        "value": 117615000,
+        "units": "USD",
+        "form": "40-F"
+      },
+      {
+        "period": "2021-12-31",
+        "fiscalYear": "2021",
+        "value": -135706000,
+        "units": "USD",
+        "form": "40-F"
+      },
+      {
+        "period": "2024-12-31",
+        "fiscalYear": "2024",
+        "value": 286960000,
+        "units": "USD",
+        "form": "40-F"
+      },
+      {
+        "period": "2025-12-31",
+        "fiscalYear": "2025",
+        "value": 504304000,
+        "units": "USD",
+        "form": "40-F"
+      }
+    ],
+    "OperatingCashFlow": [
+      {
+        "period": "2024-12-31",
+        "fiscalYear": "2024",
+        "value": 656027000,
+        "units": "USD",
+        "form": "40-F"
+      },
+      {
+        "period": "2025-12-31",
+        "fiscalYear": "2025",
+        "value": 742509000,
+        "units": "USD",
+        "form": "40-F"
+      }
+    ],
+    "GrossProfit": [
+      {
+        "period": "2024-12-31",
+        "fiscalYear": "2024",
+        "value": 506973000,
+        "units": "USD",
+        "form": "40-F"
+      },
+      {
+        "period": "2025-12-31",
+        "fiscalYear": "2025",
+        "value": 882672000,
+        "units": "USD",
+        "form": "40-F"
+      }
+    ]
+  }
 }

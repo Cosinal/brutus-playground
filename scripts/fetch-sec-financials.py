@@ -12,10 +12,11 @@ Fetches a small standard set of financial metrics from SEC XBRL company facts:
 - Revenues
 - Net Income (Loss)
 - Operating Cash Flow
-- Free Cash Flow (if tagged)
 
+Supports both US-GAAP and IFRS frameworks.
 Only includes fields that exist in the company's XBRL filings.
 Does not invent or interpolate missing data.
+Does not compute Free Cash Flow (only includes if explicitly tagged).
 
 Writes data/sec-financials.json with schema:
 {
@@ -23,10 +24,12 @@ Writes data/sec-financials.json with schema:
   "source": "SEC EDGAR company facts API",
   "cik": "0000918608",
   "companyName": "...",
+  "framework": "us-gaap" or "ifrs-full",
   "fiscalYearEnd": "12-31",
   "metrics": {
     "Revenues": [...],
-    "NetIncomeLoss": [...],
+    "NetIncome": [...],
+    "OperatingCashFlow": [...],
     ...
   }
 }
@@ -43,15 +46,29 @@ from datetime import datetime, timezone
 from typing import Dict, List, Optional
 
 
-# Standard XBRL tags we'll try to fetch (US-GAAP)
-STANDARD_METRICS = {
-    "Revenues": "us-gaap:Revenues",
-    "NetIncomeLoss": "us-gaap:NetIncomeLoss",
-    "OperatingCashFlow": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
-    "FreeCashFlow": "us-gaap:FreeCashFlow",
-    # Alternative common tags
-    "RevenuesAlt": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
-    "ProfitLoss": "us-gaap:ProfitLoss",
+# Standard metric mappings for US-GAAP and IFRS
+METRIC_MAPPINGS = {
+    "Revenues": [
+        "us-gaap:Revenues",
+        "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+        "ifrs-full:Revenue",
+        "ifrs-full:RevenueFromSaleOfGoods",
+    ],
+    "NetIncome": [
+        "us-gaap:NetIncomeLoss",
+        "us-gaap:ProfitLoss",
+        "ifrs-full:ProfitLoss",
+        "ifrs-full:NetIncomeLoss",
+    ],
+    "OperatingCashFlow": [
+        "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+        "ifrs-full:CashFlowsFromUsedInOperatingActivitiesContinuingOperations",
+        "ifrs-full:CashFlowsFromUsedInOperatingActivities",
+    ],
+    "GrossProfit": [
+        "us-gaap:GrossProfit",
+        "ifrs-full:GrossProfit",
+    ],
 }
 
 
@@ -93,20 +110,22 @@ def fetch_sec_company_facts(cik: str, user_agent: str = "Mozilla/5.0") -> Dict:
         raise ValueError(f"Failed to fetch SEC data: {e}")
 
 
-def extract_annual_data(facts_data: Dict, tag: str) -> Optional[List[Dict]]:
+def extract_annual_data(facts_data: Dict, tag_candidates: List[str]) -> Optional[List[Dict]]:
     """
-    Extract annual (10-K) data for a specific XBRL tag.
+    Extract annual (10-K or 40-F) data for a metric by trying multiple tag candidates.
     
-    Returns list of {period, value, units, filed} or None if tag not found.
+    Returns list of {period, fiscalYear, value, units, filed, form} or None if no tag found.
+    Prefers FY facts, latest filed per period end.
     """
-    try:
-        # Navigate: facts -> us-gaap -> TAG -> units -> USD (or first available unit)
-        us_gaap = facts_data.get("facts", {}).get("us-gaap", {})
+    # Try each framework (us-gaap first, then ifrs-full)
+    for tag_full in tag_candidates:
+        framework, tag_name = tag_full.split(":")
         
-        if tag not in us_gaap:
-            return None
+        facts = facts_data.get("facts", {}).get(framework, {})
+        if tag_name not in facts:
+            continue
         
-        tag_data = us_gaap[tag]
+        tag_data = facts[tag_name]
         units = tag_data.get("units", {})
         
         # Try USD first, then any available unit
@@ -116,33 +135,50 @@ def extract_annual_data(facts_data: Dict, tag: str) -> Optional[List[Dict]]:
         elif units:
             unit_key = list(units.keys())[0]
         else:
-            return None
+            continue
         
         unit_data = units[unit_key]
         
-        # Filter for annual filings (10-K) only
-        annual_data = []
+        # Filter for annual filings (10-K or 40-F), latest filed per period end
+        period_map = {}
         for item in unit_data:
             form = item.get("form", "")
-            if form == "10-K":
-                annual_data.append({
-                    "period": item.get("end", ""),
+            if form not in ["10-K", "40-F"]:
+                continue
+            
+            # Only include FY facts (fp = FY or end)
+            fp = item.get("fp", "")
+            if fp not in ["FY", "end"]:
+                continue
+            
+            period_end = item.get("end", "")
+            filed = item.get("filed", "")
+            
+            if not period_end:
+                continue
+            
+            # Keep latest filed for each period end
+            if period_end not in period_map or filed > period_map[period_end]["filed"]:
+                period_map[period_end] = {
+                    "period": period_end,
                     "fiscalYear": item.get("fy", ""),
-                    "fiscalPeriod": item.get("fp", ""),
+                    "fiscalPeriod": fp,
                     "value": item.get("val"),
                     "units": unit_key,
-                    "filed": item.get("filed", ""),
+                    "filed": filed,
+                    "form": form,
                     "frame": item.get("frame", "")
-                })
+                }
+        
+        if not period_map:
+            continue
         
         # Sort by period (most recent last)
-        annual_data.sort(key=lambda x: x["period"])
+        annual_data = sorted(period_map.values(), key=lambda x: x["period"])
         
         return annual_data if annual_data else None
-        
-    except Exception as e:
-        print(f"  Warning: Failed to extract {tag}: {e}", file=sys.stderr)
-        return None
+    
+    return None
 
 
 def load_config(config_path: str) -> Dict:
@@ -209,15 +245,24 @@ def main():
     entity_name = facts_data.get("entityName", company_name)
     print(f"✓ Found: {entity_name}")
     
+    # Detect framework (us-gaap or ifrs-full)
+    facts = facts_data.get("facts", {})
+    framework = None
+    if "us-gaap" in facts and facts["us-gaap"]:
+        framework = "us-gaap"
+    elif "ifrs-full" in facts and facts["ifrs-full"]:
+        framework = "ifrs-full"
+    
+    if framework:
+        print(f"  Framework: {framework.upper()}")
+    
     # Extract standard metrics
     metrics = {}
     
-    print("\nExtracting annual (10-K) metrics:")
+    print("\nExtracting annual (10-K / 40-F) metrics:")
     
-    for metric_name, tag in STANDARD_METRICS.items():
-        # Extract base tag name (after colon)
-        tag_name = tag.split(":")[-1]
-        data = extract_annual_data(facts_data, tag_name)
+    for metric_name, tag_candidates in METRIC_MAPPINGS.items():
+        data = extract_annual_data(facts_data, tag_candidates)
         
         if data:
             metrics[metric_name] = data
@@ -227,15 +272,16 @@ def main():
     
     if not metrics:
         print("\n✗ No standard financial metrics found in SEC filings", file=sys.stderr)
-        print("  This company may not file standard US-GAAP XBRL data.", file=sys.stderr)
+        print("  This company may not file standard XBRL data.", file=sys.stderr)
         sys.exit(1)
     
     # Build output
     output = {
         "asOf": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
-        "source": "SEC EDGAR company facts API",
+        "source": f"SEC EDGAR company facts API ({framework.upper() if framework else 'XBRL'})",
         "cik": cik,
         "companyName": entity_name,
+        "framework": framework,
         "metrics": metrics
     }
     

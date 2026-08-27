@@ -89,6 +89,7 @@ export const secFinancials = {
   companyName: secFinancialsJson.companyName,
   source: secFinancialsJson.source,
   asOf: secFinancialsJson.asOf,
+  framework: secFinancialsJson.framework || null,
   metrics: secFinancialsJson.metrics || {},
 };
 

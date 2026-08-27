@@ -26,6 +26,7 @@ import {
   marketPriceData,
   marketDataInfo,
   dataSources,
+  secFinancials,
 } from "@/data/company-data";
 
 // Eldorado-specific mining operations pack (conditional)
@@ -611,6 +612,66 @@ export function GrowthMarketComparisonChart({ id }: ChartProps) {
       </ResponsiveContainer>
       <div className="mt-3 text-sm text-zinc-400">
         Not investment advice. Data from {marketDataInfo.source}. Run <code className="text-xs">python scripts/fetch-yahoo-market.py</code> to refresh.
+      </div>
+    </div>
+  );
+}
+
+export function GrowthSECFinancialsChart({ id }: ChartProps) {
+  // Hide chart if no SEC financials available
+  if (!secFinancials.available) {
+    return null; // Silently hide when no data
+  }
+
+  // Extract annual revenue and net income data
+  const revenueData = secFinancials.metrics.Revenues || [];
+  const netIncomeData = secFinancials.metrics.NetIncome || [];
+
+  // Merge on fiscal year
+  const yearMap: Record<string, { year: string; revenue: number | null; netIncome: number | null }> = {};
+
+  revenueData.forEach((item: any) => {
+    const year = item.fiscalYear;
+    if (!yearMap[year]) yearMap[year] = { year, revenue: null, netIncome: null };
+    yearMap[year].revenue = item.value ? item.value / 1000000 : null; // Convert to millions
+  });
+
+  netIncomeData.forEach((item: any) => {
+    const year = item.fiscalYear;
+    if (!yearMap[year]) yearMap[year] = { year, revenue: null, netIncome: null };
+    yearMap[year].netIncome = item.value ? item.value / 1000000 : null; // Convert to millions
+  });
+
+  const chartData = Object.values(yearMap).sort((a, b) => a.year.localeCompare(b.year));
+
+  if (chartData.length === 0) {
+    return null;
+  }
+
+  return (
+    <div id={id} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
+      <h3 className="text-lg font-semibold mb-2 text-zinc-100">Annual Financials — Sourced from SEC</h3>
+      <p className="text-xs text-zinc-500 mb-4">
+        Source: SEC EDGAR {secFinancials.framework?.toUpperCase()} company facts | CIK {secFinancials.cik} | All figures $M USD
+      </p>
+      <ResponsiveContainer width="100%" height={300}>
+        <ComposedChart data={chartData}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+          <XAxis dataKey="year" stroke="#888" />
+          <YAxis stroke="#888" label={{ value: '$M USD', angle: -90, position: 'insideLeft', style: { fill: '#888' } }} />
+          <Tooltip
+            contentStyle={{ backgroundColor: "#18181b", border: "1px solid #3f3f46" }}
+            labelStyle={{ color: "#e4e4e7" }}
+            formatter={(value: any) => value !== null ? `$${value.toFixed(0)}M` : 'N/A'}
+          />
+          <Legend />
+          <Bar dataKey="revenue" fill="#3b82f6" name="Revenue" />
+          <Line type="monotone" dataKey="netIncome" stroke="#10b981" name="Net Income" strokeWidth={2} connectNulls />
+          <ReferenceLine y={0} stroke="#666" strokeDasharray="3 3" />
+        </ComposedChart>
+      </ResponsiveContainer>
+      <div className="mt-3 text-sm text-zinc-400">
+        Latest FY {chartData[chartData.length - 1]?.year}: Revenue ${chartData[chartData.length - 1]?.revenue?.toFixed(0)}M, Net Income ${chartData[chartData.length - 1]?.netIncome?.toFixed(0)}M
       </div>
     </div>
   );

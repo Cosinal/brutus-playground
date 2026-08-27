@@ -18,6 +18,7 @@ import {
   GrowthAISCvsRealizedChart,
   GrowthRevenueAndFCFChart,
   GrowthMarketComparisonChart,
+  GrowthSECFinancialsChart,
 } from "@/components/Charts";
 import { company, dataSources } from "@/data/company-data";
 import { companyInfo } from "@/data/packs/eldorado-operations";
@@ -82,6 +83,9 @@ const buildGrowthCharts = (): ChartConfig[] => {
   
   // Always include market comparison chart
   charts.push({ id: "growth-market", component: GrowthMarketComparisonChart, visible: true });
+  
+  // Add SEC financials chart if available
+  charts.push({ id: "growth-sec-financials", component: GrowthSECFinancialsChart, visible: true });
   
   return charts;
 };
