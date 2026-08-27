@@ -1,17 +1,18 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ChatMessage, parseIntent } from "@/lib/chat-parser";
+import { ChatMessage, parseIntent, BoardMode } from "@/lib/chat-parser";
 
 interface ChatPanelProps {
   onChartAction: (action: any) => void;
+  currentMode: BoardMode;
 }
 
-export default function ChatPanel({ onChartAction }: ChatPanelProps) {
+export default function ChatPanel({ onChartAction, currentMode }: ChatPanelProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
-      content: "Ask me to filter, modify, add, or remove charts—or ask about Eldorado's investment story.",
+      content: "Ask about profitability, production, costs—or tell me to filter/modify/add/remove charts. Try: 'what was profitability', 'show only Lamaque', or 'reset'.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -44,6 +45,9 @@ export default function ChatPanel({ onChartAction }: ChatPanelProps) {
     <div className="bg-zinc-900 rounded-lg border border-zinc-800 flex flex-col h-full">
       <div className="p-4 border-b border-zinc-800">
         <h3 className="text-lg font-semibold text-zinc-100">Chat</h3>
+        {currentMode !== "default" && (
+          <div className="text-xs text-blue-400 mt-1">Mode: {currentMode}</div>
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -72,8 +76,8 @@ export default function ChatPanel({ onChartAction }: ChatPanelProps) {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Try: 'Just Lamaque' or 'Add copper production'"
-            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Try: 'what was profitability' or 'show only Lamaque'"
+            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <button
             type="submit"
