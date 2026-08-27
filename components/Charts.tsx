@@ -130,19 +130,31 @@ export function AssetMixChart({ id, filter }: ChartProps) {
   const getFilteredData = () => {
     if (!filter) return assetMix;
     
+    // Use profitabilityByMine to determine country for future-proofing (e.g., if McIlvenna Bay added to assetMix)
+    const canadianMines = profitabilityByMine.filter(m => m.country === "Canada").map(m => m.mine);
+    const turkiyeMines = profitabilityByMine.filter(m => m.country === "Türkiye").map(m => m.mine);
+    const greeceMines = profitabilityByMine.filter(m => m.country === "Greece").map(m => m.mine);
+    
     if (filter === "lamaque") return assetMix.filter(m => m.mine === "Lamaque");
-    if (filter === "skouries") return []; // Skouries not in Q2 2026 asset mix (no gold production yet)
-    if (filter === "canada") return assetMix.filter(m => m.mine === "Lamaque");
-    if (filter === "turkiye") return assetMix.filter(m => m.mine === "Kışladağ" || m.mine === "Efemçukuru");
-    if (filter === "greece") return assetMix.filter(m => m.mine === "Olympias");
-    if (filter === "exclude-canada") return assetMix.filter(m => m.mine !== "Lamaque");
-    if (filter === "exclude-turkiye") return assetMix.filter(m => m.mine !== "Kışladağ" && m.mine !== "Efemçukuru");
-    if (filter === "exclude-greece") return assetMix.filter(m => m.mine !== "Olympias");
+    if (filter === "skouries") return assetMix.filter(m => m.mine === "Skouries");
+    if (filter === "canada") return assetMix.filter(m => canadianMines.includes(m.mine));
+    if (filter === "turkiye") return assetMix.filter(m => turkiyeMines.includes(m.mine));
+    if (filter === "greece") return assetMix.filter(m => greeceMines.includes(m.mine));
+    if (filter === "exclude-canada") return assetMix.filter(m => !canadianMines.includes(m.mine));
+    if (filter === "exclude-turkiye") return assetMix.filter(m => !turkiyeMines.includes(m.mine));
+    if (filter === "exclude-greece") return assetMix.filter(m => !greeceMines.includes(m.mine));
     
     return assetMix;
   };
 
   const filteredData = getFilteredData();
+  
+  // Recalculate percentages so filtered slices sum to 100%
+  const totalProduction = filteredData.reduce((sum, item) => sum + item.q2_2026_production, 0);
+  const dataWithRecalculatedPercentages = filteredData.map(item => ({
+    ...item,
+    percentage: totalProduction > 0 ? parseFloat(((item.q2_2026_production / totalProduction) * 100).toFixed(1)) : 0,
+  }));
 
   return (
     <div id={id} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
@@ -151,7 +163,7 @@ export function AssetMixChart({ id, filter }: ChartProps) {
       <ResponsiveContainer width="100%" height={280}>
         <PieChart>
           <Pie
-            data={filteredData}
+            data={dataWithRecalculatedPercentages}
             cx="50%"
             cy="50%"
             labelLine={false}
@@ -160,14 +172,14 @@ export function AssetMixChart({ id, filter }: ChartProps) {
             fill="#8884d8"
             dataKey="percentage"
           >
-            {filteredData.map((entry, index) => (
+            {dataWithRecalculatedPercentages.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
           <Tooltip
             contentStyle={{ backgroundColor: "#18181b", border: "1px solid #3f3f46" }}
             formatter={(value: any, name: string, props: any) => [
-              `${props.payload.q2_2026_production_oz} oz (${value}%)`,
+              `${props.payload.q2_2026_production} oz (${value}%)`,
               props.payload.mine,
             ]}
           />
