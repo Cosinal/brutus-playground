@@ -2,87 +2,114 @@
 
 **By Jorden Shaw** | [LinkedIn](https://linkedin.com/in/jordenshaw587/)
 
-A conversational investment dashboard for Eldorado Gold Corporation (ELD/EGO) that answers questions by rebuilding the entire interface around your query.
+A conversational investment dashboard for Eldorado Gold Corporation (ELD.TO / EGO) using **sourced public data only**. Ask questions, filter charts, all backed by Q2 2026 filings.
 
-🔗 **Live Demo**: [https://brutus-playground.vercel.app](https://brutus-playground.vercel.app) *(will be updated after deployment)*
-
----
-
-## What This Does
-
-This is Jorden Shaw's personal website—not a portfolio page with a dashboard tucked away, but a **single-page live investment dashboard** that IS the site.
-
-**Default experience**: 5 prebuilt charts analyzing Eldorado Gold using public Q2 2026 data.
-
-**Question-driven mode**: Ask "what was profitability" and the **entire board rebuilds** to show profitability from every angle—company trend, FCF split (operating vs growth capex), mine-level AISC, metal revenue, earnings. Same for production, Skouries, or other focused questions. The question owns the layout.
+🔗 **Live Demo**: *Deploy to Vercel to get public URL*
 
 ---
 
-## Data & Sources
+## What This Is
 
-All figures from **public sources only**. No invented numbers, no confidential work product.
+This IS Jorden Shaw's personal website—not a portfolio page with a dashboard nested inside, but a **single-page live investment dashboard** analyzing Eldorado Gold.
 
-### Sources (as of August 2026)
-1. **Eldorado Gold Q2 2026 Financial Results** (eldoradogold.com/investors)
-2. **Q2 2026 MD&A** filed on SEDAR+ and SEC EDGAR
-3. **Yahoo Finance** for ELD.TO (TSX, CAD) and EGO (NYSE, USD) market data
-4. **Kitco.com / TradingView** for gold spot prices (USD/oz)
+**5 prebuilt charts** on load (production by mine, AISC vs realized gold, asset mix, project status, market snapshot).
+
+**Chat-driven**: Filter (`"show only Lamaque"`), add/remove charts (`"remove the market chart"`), ask questions (`"what is Q2 AISC"`, `"has Skouries produced concentrate"`). All answers from sourced data—never invented.
+
+---
+
+## Sourced Data — As of 2026-08-26
+
+### Sources
+1. **Eldorado Gold Q2 2026 News Release** (2026-07-30): [https://www.eldoradogold.com/investors/news-releases/eldorado-gold-reports-solid-q2-2026-financial-and-operational-results](https://www.eldoradogold.com/investors/news-releases/eldorado-gold-reports-solid-q2-2026-financial-and-operational-results)
+2. **Q2 2026 MD&A** (SEDAR+/SEC PDF)
+3. **Q1 2026 News Release**
+4. **Q4 2025 Operations Data PDF**
+5. **Skouries First Ore Crushed News Release**
+6. **Performance and Guidance at a Glance**
+7. **Yahoo Finance**: ELD.TO (CAD), EGO (USD) as of 2026-08-26
+
+All data baked into `/data/eldorado-q-series.json`. **No invented figures. Blanks stay blank.**
 
 ### Key Figures (Q2 2026)
-- **Production**: H1 2026: 204,974 oz gold | FY 2026 Guidance: 495–600 koz
-- **AISC**: $1,926/oz USD (consolidated)
-- **Realized gold**: $4,379/oz USD
-- **Cash margin**: $2,453/oz (realized minus AISC)
-- **FCF**: -$334.1M total, +$40.9M ex-growth (Skouries + McIlvenna Bay capex consuming -$375M)
-- **Revenue**: $487.5M total (gold $449.7M, other metals $37.8M)
 
-### By Mine (Q2 2026, USD/oz)
-- **Lamaque** (Canada): AISC $1,192 | 46 koz
-- **Kışladağ** (Türkiye): AISC $2,407 | 32 koz
-- **Efemçukuru** (Türkiye): AISC $2,252 | 15 koz
-- **Olympias** (Greece): AISC $2,465 | 10 koz
-- **McIlvenna Bay** (Canada): ramping, first Cu June 2026, first Zn July 2026
-- **Skouries** (Greece): commissioning, first Cu-Au concentrate Q3 2026, commercial Q4 2026
+**Production**:
+- Produced: 104,616 oz gold (Lamaque 52,340; Kışladağ 19,108; Efemçukuru 18,019; Olympias 15,125)
+- Sold: 102,691 oz
+- H1 2026: 204,974 oz
+- FY 2026 guidance: 495–600 koz (incl. Skouries + McBay)
+
+**Costs & Margin**:
+- **AISC**: $1,926/oz USD (exactly, not ~)
+- **Realized gold**: $4,379/oz USD
+- **Margin**: $2,453/oz (realized minus AISC)
+- **By mine AISC**: Lamaque $1,192 | Kışladağ $2,407 | Efemçukuru $2,252 | Olympias $2,465 | Corporate $130
+
+**Q2 AISC** above FY ops guidance ($1,670–1,870) but **production is H2-weighted**; not a concluded miss.
+
+**Financials**:
+- Revenue: $487.5M USD
+- FCF: -$334.1M (total)
+- FCF ex-growth: $40.9M (operating mines positive; Skouries + McBay consuming capex)
+- Cash: $554.6M | Debt: $1,749.9M
+
+**Market (2026-08-26)**:
+- ELD.TO: C$65.19 (-1.97%), cap C$17.002B, 52w C$32.77–C$69.46
+- EGO: $46.96 USD (-2.45%), cap $12.248B USD, 52w $23.81–$51.16
+- Gold futures (COMEX GC=F): $4,690.6 (not LBMA, not company realized)
+
+### Project Status
+
+**Skouries (Greece)**:
+- **First Cu-Au concentrate**: EXPECTED Q3 2026 (**NOT yet reported** as of 2026-07-30)
+- **Commercial production**: EXPECTED Q4 2026
+- 97% complete at 2026-06-30
+- First ore crushed July 2026 on temp power
+- Final grid energization still required
+- Do NOT write as if concentrate has shipped
+
+**McIlvenna Bay (Canada)**:
+- **First copper**: 2026-06-07 (achieved)
+- **First zinc**: July 2026 (achieved)
+- **Commercial production**: EXPECTED Q3 2026 (**not yet achieved**)
+- Q2 2026: 5,405 t processed → 65,398 payable Cu lb
+- Not in AISC denominator until commercial
 
 ---
 
-## Features
+## Chat Examples
 
-### Default Dashboard (5 Charts)
-1. **Production by Mine** – Quarterly gold production (koz) by asset, Q1 2025 → Q4 2026*
-2. **AISC vs Gold** – Consolidated AISC vs realized gold price trend
-3. **Asset Mix** – Q2 2026 production breakdown by mine (pie chart)
-4. **Ramp Timeline** – Skouries & McIlvenna Bay milestones (on-track, achieved, delayed)
-5. **ELD vs Gold Price** – 24-month stock (ELD.TO CAD) vs gold (USD/oz) correlation
+### Questions (Answered from Sourced Data)
+- `"what is Q2 AISC"` → "$1,926/oz sold (USD). By mine: Lamaque $1,192..."
+- `"has Skouries produced concentrate"` → "No; expected Q3 2026; not yet reported as of 2026-07-30..."
+- `"has McIlvenna Bay hit commercial"` → "No; first Cu 2026-06-07; commercial expected Q3 2026..."
+- `"what was Q2 margin"` → "$2,453/oz (realized $4,379 minus AISC $1,926)"
 
-### Profitability Mode (Question Takes Over)
-Ask **"what was profitability"** (or earnings, margin, AISC vs gold) and the board rebuilds with 5 profitability views:
-1. **Company Trend**: Realized gold vs AISC vs TCC (Q1 2025 → Q2 2026)
-2. **FCF Split**: Total FCF vs FCF ex-growth projects (shows -$334M vs +$41M for Q2)
-3. **By Mine & Country**: Q2 AISC by mine, grouped Canada / Türkiye / Greece
-4. **By Metal**: Gold revenue vs other metals (Cu/Zn/Ag) over time
-5. **Revenue & Earnings**: Revenue, adj. EBITDA, net income trend
+### Filtering
+- `"show only Lamaque"` → filter to Lamaque
+- `"just Canada"` → Canadian operations
+- `"hide Türkiye"` → exclude Türkiye mines
 
-**No fake segments**: Eldorado does not report "services." If asked, the dashboard explains what's actually disclosed.
+### Chart Manipulation
+- `"remove the market chart"` → hide market snapshot
+- `"add production"` → restore production chart
+- `"reset"` → back to default 5 charts
 
-### Chat Commands
-- **Mode switching**: `"what was profitability"` → profitability board | `"reset"` → default 5 charts
-- **Filter**: `"show only Lamaque"`, `"just Canada"`, `"hide Türkiye"`
-- **Modify**: `"restyle AISC to dark gold theme"` (theme variants)
-- **Add/Remove**: `"remove the timeline"`, `"add production"`
-- **Answer**: `"what is Q2 AISC?"` → sources exact figures with citation
+### What Chat Refuses
+- NAV/share (not disclosed in filings)
+- Q3/Q4 2026 actuals (not yet reported; next print ~Oct 29, 2026)
+- Invented 2027 projections
+- "Commercial production achieved" for Skouries or McBay (both still expected)
 
 ---
 
 ## Tech Stack
 
 - **Next.js 14** (App Router) with TypeScript
-- **React 18** with client-side state for mode switching
-- **Recharts** for all visualizations
-- **Tailwind CSS** for dark finance aesthetic
-- **Rule-based intent parser** – chat works without LLM API keys using pattern matching and templated responses
-
-No paid APIs. No secrets required. The entire dataset is baked into the repo as TypeScript data structures so the site works offline/static.
+- **Recharts** for visualizations
+- **Tailwind CSS** dark theme
+- **Rule-based intent parser** – no LLM/API keys required
+- **Sourced data**: `/data/eldorado-q-series.json` (public filings only)
 
 ---
 
@@ -105,42 +132,57 @@ npm start
 
 ## Deployment
 
-### Vercel (Recommended)
-1. Push this repo to GitHub
-2. Import at [vercel.com/new](https://vercel.com/new)
-3. Framework: Next.js (auto-detected)
-4. Build command: `npm run build` (default)
-5. Deploy
+### Vercel (Recommended, 2 minutes)
 
-The site is static-export compatible. Preview deploy URL becomes the live demo immediately.
+1. Go to [vercel.com](https://vercel.com)
+2. Import `Cosinal/brutus-playground`
+3. Deploy (auto-detects Next.js)
+4. Get live URL: `brutus-playground.vercel.app`
 
-### Cloudflare Pages / GitHub Pages
-Next.js static export:
-```bash
-npm run build
-# Deploy .next/static or use next export if configured
-```
+No secrets required. No environment variables. All data baked into repo.
+
+See `DEPLOY.md` for full instructions.
 
 ---
 
-## Chat Examples
+## Data Quality
 
-### Profitability Mode
-- `"what was profitability"` → switches to 5-view profitability analysis
-- `"were they profitable"` → profitability board
-- `"how did they make money"` → profitability board
+**No interpolation. No invention.**
+- Production by mine: Q1 2025 → Q2 2026 (PDF finals from quarterly reports)
+- AISC vs realized: Q1 2025 → Q2 2026 (blanks where not disclosed, e.g. Q3/Q4 2025 realized gold)
+- Financials: blanks for Q3 2025 FCF, Q4 2025 FCF (not disclosed)
+- Skouries/McBay gold oz: 0 until reported (no pie slice yet)
 
-### Filters (work in any mode)
-- `"show only Lamaque"` → filter to Lamaque
-- `"just Canada"` → Canadian operations
-- `"hide Türkiye"` → exclude Türkiye mines
+**Currency explicit**:
+- ELD.TO in **CAD**
+- EGO in **USD**
+- AISC, TCC, realized gold in **USD/oz**
+- Revenue, FCF, cash, debt in **USD millions**
 
-### Questions
-- `"what is Q2 AISC?"` → "$1,926/oz USD consolidated. Lamaque $1,192..."
-- `"what was production?"` → "Q2 2026: 104 koz (Lamaque 46, Kışladağ 32...)"
+**Sources cited** on every chart footer.
 
-### Reset
-- `"reset"` or `"show the full dashboard"` → back to default 5 charts
+---
+
+## Investment Thesis (Dashboard's Story)
+
+Eldorado Gold's 2026 transformation tracked through Q2 2026 data:
+
+**✅ Ramp Progress**:
+- McIlvenna Bay first Cu/Zn achieved (June/July 2026), commercial expected Q3
+- Skouries 97% complete, first ore crushed, concentrate expected Q3, commercial Q4
+
+**⚠️ Cost Tension**:
+- Q2 AISC $1,926/oz above ops guidance ($1,670–1,870) but production H2-weighted
+- Olympias high-cost ($2,465/oz); Lamaque low-cost ($1,192/oz)
+
+**💰 FCF Story**:
+- Operating mines: +$40.9M FCF ex-growth (profitable)
+- Growth capex: Skouries + McBay consuming capital
+- Total Q2 FCF: -$334.1M (expected during commissioning)
+
+**📈 Decision Framework**:
+- **If** Skouries/McBay ramp on schedule → polymetallic transformation de-risks
+- **If** Q2 AISC stays elevated in H2 → watch margin compression vs guidance
 
 ---
 
@@ -149,47 +191,34 @@ npm run build
 ```
 /app
   layout.tsx       # Root layout, metadata
-  page.tsx         # Main dashboard with mode switching logic
+  page.tsx         # Main dashboard with chart state
   globals.css      # Dark theme
 
 /components
-  Charts.tsx       # All chart components (default + profitability)
-  ChatPanel.tsx    # Chat UI with mode indicator
+  Charts.tsx       # 5 chart components using sourced data
+  ChatPanel.tsx    # Chat UI
 
 /data
-  eldorado-data.ts # Sourced data: production, AISC, profitability, ramp
+  eldorado-q-series.json  # Sourced data seed (all figures from filings)
+  eldorado-data.ts        # TypeScript interfaces and exports
 
 /lib
-  chat-parser.ts   # Intent parser for mode switching and commands
+  chat-parser.ts   # Intent parser for chat commands
 ```
-
----
-
-## Investment Thesis (Dashboard's Argument)
-
-Eldorado Gold is executing a 2026 polymetallic transformation:
-
-1. **Skouries** (Greece): Q3 2026 first Cu-Au concentrate, Q4 commercial → major copper-gold asset goes live
-2. **McIlvenna Bay** (Canada): June 2026 first Cu, July first Zn → ramping to 2,750 tpd
-3. **Cost tension**: Q2 2026 AISC $1,926/oz elevated vs 2025 avg ~$1,810/oz (Olympias high-cost, Skouries pre-commercial)
-4. **FCF bifurcation**: Operating mines +$41M FCF; growth projects -$375M capex → total -$334M
-
-**Decision framework**:
-- ✅ **If**: Skouries + McBay ramp on schedule AND costs compress <$1,800/oz by Q1 2027 → asset base transforms, polymetallic story de-risks
-- ⚠️ **If**: Ramps slip or costs stay >$1,900/oz → margin pressure at $3,000–3,200 gold becomes a concern
-
-This dashboard tracks production, cost trajectory, and ramp milestones that drive the 2027 investment decision.
 
 ---
 
 ## Notes
 
-- **Not investment advice**. This is a portfolio piece demonstrating modern web dev, data viz, UX design, and investment analysis.
-- **No confidential data**. All figures from public filings and market sources.
-- **Currency explicit**: USD vs CAD labeled everywhere.
-- **Blanks stay blank**: If a data series doesn't exist in public filings, dashboard says so rather than inventing figures.
+- **Not investment advice**. Portfolio piece demonstrating modern web dev, data viz, and investment analysis.
+- **No confidential data**. All figures from public filings.
+- **Currency explicit** everywhere (USD vs CAD).
+- **Blanks stay blank**: If not disclosed in filings, dashboard says so.
+- **Skouries/McBay**: Dashboard correctly reflects "expected" vs "achieved" status per 2026-07-30 NR.
 
 ---
 
 **Built by Jorden Shaw** | August 2026  
 [LinkedIn](https://linkedin.com/in/jordenshaw587/) | [GitHub](https://github.com/Cosinal/brutus-playground)
+
+**Live URL**: *Deploy to Vercel for public URL*
