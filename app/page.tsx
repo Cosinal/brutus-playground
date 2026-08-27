@@ -6,6 +6,7 @@ import {
   ProductionByMineChart,
   AISCvsGoldChart,
   AssetMixChart,
+  ExpectedVsAchievedChart,
   RampTimelineChart,
   ELDvsGoldChart,
   ProfitabilityCompanyChart,
@@ -41,7 +42,7 @@ const buildDefaultCharts = (): ChartConfig[] => {
       { id: "production", component: ProductionByMineChart, visible: true },
       { id: "aisc", component: AISCvsGoldChart, visible: true },
       { id: "mix", component: AssetMixChart, visible: true },
-      { id: "ramp", component: RampTimelineChart, visible: true }
+      { id: "expected-achieved", component: ExpectedVsAchievedChart, visible: true }
     );
   }
   
@@ -108,6 +109,12 @@ export default function Home() {
       } else if (action.mode === "growth") {
         setCharts(buildGrowthCharts());
         setFilter(null);
+      } else if (action.mode === "filings") {
+        // Filings mode: show only expected-vs-achieved chart
+        setCharts([
+          { id: "expected-achieved", component: ExpectedVsAchievedChart, visible: true }
+        ]);
+        setFilter(null);
       }
     } else if (action.type === "filter") {
       setFilter(action.target);
@@ -135,6 +142,7 @@ export default function Home() {
   const getModeTitle = () => {
     if (mode === "profitability") return `${company.shortName} Profitability`;
     if (mode === "growth") return `${company.shortName} Growth`;
+    if (mode === "filings") return `${company.shortName} — Expected vs Achieved`;
     return `${company.shortName} Dashboard`;
   };
 
@@ -169,6 +177,14 @@ export default function Home() {
           <span>Q1 2025–Q2 2026</span>
           <span>FY 2025: 488 koz</span>
           <span>FY 2026 Guidance: 495–600 koz</span>
+        </div>
+      );
+    } else if (mode === "filings") {
+      return (
+        <div className="text-xs sm:text-sm text-zinc-400 flex flex-wrap gap-3">
+          <span>Latest: Q2 2026 6-K (2026-07-30)</span>
+          <span>McBay first Cu: ✓ Achieved</span>
+          <span>Skouries Q3 2026: Expected</span>
         </div>
       );
     }
