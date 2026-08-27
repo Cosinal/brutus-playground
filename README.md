@@ -225,7 +225,7 @@ npm run build
 
 ## Investment Thesis — Eldorado Gold
 
-Eldorado Gold is executing a multi-asset transformation in 2026. **Skouries** (Greece) targets first copper-gold concentrate in Q3 2026 and commercial production Q4 2026, unlocking a major polymetallic asset. **McIlvenna Bay** (Canada) achieved first copper in June 2026 and first zinc in July 2026, ramping toward 2,750 tpd.
+Eldorado Gold is executing a multi-asset transformation in 2026. **Skouries** (Greece) targets first copper-gold concentrate in Q3 2026 and commercial production Q4 2026, unlocking a major polymetallic asset. **McIlvenna Bay** (Canada) achieved first copper in June 2026, with commercial production expected Q3 2026, ramping toward nameplate 4,900 tpd (June 8, 2026 NR).
 
 **The tension**: Q2 2026 AISC rose to $1,926/oz (vs. Q1 2025 $1,559/oz), driven by Olympias' high costs and Skouries pre-commercial spending. H1 2026 production of 204,974 oz tracks toward FY 2026 guidance of 495–600 koz.
 
