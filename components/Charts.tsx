@@ -19,20 +19,30 @@ import {
   Area,
   AreaChart,
 } from "recharts";
+
+// General company data (available for all companies)
+import {
+  company,
+  marketPriceData,
+  marketDataInfo,
+  dataSources,
+  secFinancials,
+} from "@/data/company-data";
+
+// Eldorado-specific mining operations pack (conditional)
 import {
   productionByMine,
   aiscVsGold,
   assetMix,
   rampTimeline,
-  dataSources,
   profitabilityCompany,
   profitabilityByMine,
   profitabilityByMetal,
   profitabilityBySegment,
   annualProduction,
   revenueAndFCF,
-  marketPriceData,
-} from "@/data/eldorado-data";
+  companyInfo,
+} from "@/data/packs/eldorado-operations";
 
 interface ChartProps {
   id: string;
@@ -222,18 +232,76 @@ export function RampTimelineChart({ id, filter }: ChartProps) {
   );
 }
 
-// Chart 5: ELD vs Gold Price (Removed - use market data in growth mode)
-// This chart used invented price data and has been deprecated
-// Use GrowthMarketComparisonChart in growth mode for sourced market data
-export function ELDvsGoldChart({ id, filter }: ChartProps) {
+// Chart 5: Market Performance — 5-Year History
+// Source: Yahoo Finance v8 chart API
+// Data: Dynamic tickers from company config
+// Display: Indexed to 100 at first non-null close (relative performance)
+export function ELDvsGoldChart({ id }: ChartProps) {
+  if (marketPriceData.length === 0) {
+    return (
+      <div id={id} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
+        <h3 className="text-lg font-semibold mb-2 text-zinc-100">Market Price Data Not Available</h3>
+        <p className="text-xs text-zinc-500 mb-4">Yahoo Finance data fetch required</p>
+        <div className="p-8 text-center text-zinc-400">
+          <p className="mb-2">Run: <code className="text-zinc-300">python scripts/fetch-yahoo-market.py</code></p>
+          <p className="text-sm">This will fetch market history for {company.name} from Yahoo Finance.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Get ticker info for legend labels
+  const tickers = marketDataInfo.tickers as Record<string, { symbol: string; currency: string }>;
+  const tickerKeys = Object.keys(tickers);
+  
+  // Generate colors for each ticker
+  const colors = ["#f59e0b", "#10b981", "#eab308", "#3b82f6", "#8b5cf6"];
   return (
     <div id={id} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
-      <h3 className="text-lg font-semibold mb-2 text-zinc-100">Market Price Data Not Available</h3>
-      <p className="text-xs text-zinc-500 mb-4">Market comparison charts require Yahoo Finance or Stooq data</p>
-      <div className="p-12 text-center text-zinc-400">
-        <p className="mb-4">Historical market price data (EGO, ELD.TO, gold futures) is available in growth mode.</p>
-        <p className="text-sm">Ask: "show growth" or "historical growth" to view time-series market comparisons.</p>
-        <p className="text-xs mt-4 text-zinc-600">Current market close 2026-08-26: ELD.TO CAD 65.19, EGO USD 46.96</p>
+      <h3 className="text-lg font-semibold mb-2 text-zinc-100">5-Year Market Performance</h3>
+      <p className="text-xs text-zinc-500 mb-4">
+        Source: Yahoo Finance, {marketDataInfo.interval} over {marketDataInfo.range} | Indexed to 100 at first close
+      </p>
+      <ResponsiveContainer width="100%" height={280}>
+        <LineChart data={marketPriceData}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+          <XAxis 
+            dataKey="date" 
+            stroke="#888" 
+            angle={-45} 
+            textAnchor="end" 
+            height={80}
+            tickFormatter={(value) => {
+              const date = new Date(value);
+              return date.toLocaleDateString('en-US', { year: '2-digit', month: 'short' });
+            }}
+          />
+          <YAxis stroke="#888" label={{ value: 'Indexed (100 = start)', angle: -90, position: 'insideLeft', style: { fill: '#888' } }} />
+          <Tooltip
+            contentStyle={{ backgroundColor: "#18181b", border: "1px solid #3f3f46" }}
+            labelStyle={{ color: "#e4e4e7" }}
+            formatter={(value: any) => value !== null ? value.toFixed(1) : 'N/A'}
+          />
+          <Legend />
+          {tickerKeys.map((tickerKey, idx) => {
+            const ticker = tickers[tickerKey];
+            const label = `${ticker.symbol} (${ticker.currency})`;
+            return (
+              <Line 
+                key={tickerKey}
+                type="monotone" 
+                dataKey={tickerKey} 
+                stroke={colors[idx % colors.length]} 
+                name={label} 
+                strokeWidth={2} 
+                connectNulls 
+              />
+            );
+          })}
+        </LineChart>
+      </ResponsiveContainer>
+      <div className="mt-3 text-sm text-zinc-400">
+        Not investment advice. Data from {marketDataInfo.source}. Run <code className="text-xs">python scripts/fetch-yahoo-market.py</code> to refresh.
       </div>
     </div>
   );
@@ -565,27 +633,29 @@ export function GrowthMarketComparisonChart({ id, filter }: ChartProps) {
   if (marketPriceData.length === 0) {
     return (
       <div id={id} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
-        <h3 className="text-lg font-semibold mb-2 text-zinc-100">Market Performance: EGO vs ELD.TO vs Gold</h3>
-        <p className="text-xs text-zinc-500 mb-4">Source: Yahoo Finance / Stooq CSV (unavailable)</p>
-        <div className="p-12 text-center text-zinc-400">
-          <p className="mb-4 text-zinc-300">Market price history not available</p>
-          <p className="text-sm mb-6">Yahoo Finance v8 chart API and Stooq CSV both blocked by anti-bot protection. Historical series omitted rather than invented.</p>
-          <div className="space-y-2 text-left max-w-md mx-auto bg-zinc-800 p-4 rounded border border-zinc-700">
-            <div className="text-sm font-medium text-zinc-300">Market Close 2026-08-26 (sourced):</div>
-            <div className="text-sm text-zinc-400">ELD.TO (TSX): CAD 65.19 (-1.97%)</div>
-            <div className="text-sm text-zinc-400">EGO (NYSE): USD 46.96 (-2.45%)</div>
-            <div className="text-sm text-zinc-400">52-week range: ELD.TO CAD 32.77–69.46, EGO USD 23.81–51.16</div>
-          </div>
-          <p className="text-xs mt-6 text-zinc-600">To implement: Manual Yahoo/Stooq CSV import with real closes, index to 100 at disclosed start date</p>
+        <h3 className="text-lg font-semibold mb-2 text-zinc-100">Market Performance Over Time</h3>
+        <p className="text-xs text-zinc-500 mb-4">Yahoo Finance data fetch required</p>
+        <div className="p-8 text-center text-zinc-400">
+          <p className="mb-2">Run: <code className="text-zinc-300">python scripts/fetch-yahoo-market.py</code></p>
+          <p className="text-sm">This will fetch market history for {company.name} from Yahoo Finance.</p>
         </div>
       </div>
     );
   }
 
+  // Get ticker info for legend labels
+  const tickers = marketDataInfo.tickers as Record<string, { symbol: string; currency: string }>;
+  const tickerKeys = Object.keys(tickers);
+  
+  // Generate colors for each ticker
+  const colors = ["#f59e0b", "#10b981", "#eab308", "#3b82f6", "#8b5cf6"];
+
   return (
     <div id={id} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
-      <h3 className="text-lg font-semibold mb-2 text-zinc-100">Market Performance: EGO vs ELD.TO vs Gold</h3>
-      <p className="text-xs text-zinc-500 mb-4">Source: Indexed to 100 at start date | As of 2026-08-26 | EGO (USD), ELD.TO (CAD), Gold</p>
+      <h3 className="text-lg font-semibold mb-2 text-zinc-100">Market Performance Over Time</h3>
+      <p className="text-xs text-zinc-500 mb-4">
+        Source: Yahoo Finance, {marketDataInfo.interval} over {marketDataInfo.range} | Indexed to 100 at first close
+      </p>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={marketPriceData}>
           <CartesianGrid strokeDasharray="3 3" stroke="#333" />
@@ -604,16 +674,88 @@ export function GrowthMarketComparisonChart({ id, filter }: ChartProps) {
           <Tooltip
             contentStyle={{ backgroundColor: "#18181b", border: "1px solid #3f3f46" }}
             labelStyle={{ color: "#e4e4e7" }}
-            formatter={(value: any) => value ? value.toFixed(0) : 'N/A'}
+            formatter={(value: any) => value !== null ? value.toFixed(1) : 'N/A'}
           />
           <Legend />
-          <Line type="monotone" dataKey="EGO" stroke="#f59e0b" name="EGO (NYSE, USD)" strokeWidth={2} connectNulls />
-          <Line type="monotone" dataKey="ELD_TO" stroke="#10b981" name="ELD.TO (TSX, CAD)" strokeWidth={2} connectNulls />
-          <Line type="monotone" dataKey="gold" stroke="#eab308" name="Gold" strokeWidth={2} connectNulls />
+          {tickerKeys.map((tickerKey, idx) => {
+            const ticker = tickers[tickerKey];
+            const label = `${ticker.symbol} (${ticker.currency})`;
+            return (
+              <Line 
+                key={tickerKey}
+                type="monotone" 
+                dataKey={tickerKey} 
+                stroke={colors[idx % colors.length]} 
+                name={label} 
+                strokeWidth={2} 
+                connectNulls 
+              />
+            );
+          })}
         </LineChart>
       </ResponsiveContainer>
       <div className="mt-3 text-sm text-zinc-400">
-        Market close 2026-08-26: ELD.TO CAD 65.19 (-1.97%), EGO USD 46.96 (-2.45%) | 52w range: ELD.TO CAD 32.77–69.46, EGO USD 23.81–51.16
+        Not investment advice. Data from {marketDataInfo.source}. Run <code className="text-xs">python scripts/fetch-yahoo-market.py</code> to refresh.
+      </div>
+    </div>
+  );
+}
+
+export function GrowthSECFinancialsChart({ id }: ChartProps) {
+  // Hide chart if no SEC financials available
+  if (!secFinancials.available) {
+    return null; // Silently hide when no data
+  }
+
+  // Extract annual revenue and net income data
+  const revenueData = secFinancials.metrics.Revenues || [];
+  const netIncomeData = secFinancials.metrics.NetIncome || [];
+
+  // Merge on fiscal year
+  const yearMap: Record<string, { year: string; revenue: number | null; netIncome: number | null }> = {};
+
+  revenueData.forEach((item: any) => {
+    const year = item.fiscalYear;
+    if (!yearMap[year]) yearMap[year] = { year, revenue: null, netIncome: null };
+    yearMap[year].revenue = item.value ? item.value / 1000000 : null; // Convert to millions
+  });
+
+  netIncomeData.forEach((item: any) => {
+    const year = item.fiscalYear;
+    if (!yearMap[year]) yearMap[year] = { year, revenue: null, netIncome: null };
+    yearMap[year].netIncome = item.value ? item.value / 1000000 : null; // Convert to millions
+  });
+
+  const chartData = Object.values(yearMap).sort((a, b) => a.year.localeCompare(b.year));
+
+  if (chartData.length === 0) {
+    return null;
+  }
+
+  return (
+    <div id={id} className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
+      <h3 className="text-lg font-semibold mb-2 text-zinc-100">Annual Financials — Sourced from SEC</h3>
+      <p className="text-xs text-zinc-500 mb-4">
+        Source: SEC EDGAR {secFinancials.framework?.toUpperCase()} company facts | CIK {secFinancials.cik} | All figures $M USD
+      </p>
+      <ResponsiveContainer width="100%" height={300}>
+        <ComposedChart data={chartData}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+          <XAxis dataKey="year" stroke="#888" />
+          <YAxis stroke="#888" label={{ value: '$M USD', angle: -90, position: 'insideLeft', style: { fill: '#888' } }} />
+          <Tooltip
+            contentStyle={{ backgroundColor: "#18181b", border: "1px solid #3f3f46" }}
+            labelStyle={{ color: "#e4e4e7" }}
+            formatter={(value: any) => value !== null ? `$${value.toFixed(0)}M` : 'N/A'}
+          />
+          <Legend />
+          <Bar dataKey="revenue" fill="#3b82f6" name="Revenue" />
+          <Line type="monotone" dataKey="netIncome" stroke="#10b981" name="Net Income" strokeWidth={2} connectNulls />
+          <ReferenceLine y={0} stroke="#666" strokeDasharray="3 3" />
+        </ComposedChart>
+      </ResponsiveContainer>
+      <div className="mt-3 text-sm text-zinc-400">
+        Latest FY {chartData[chartData.length - 1]?.year}: Revenue ${chartData[chartData.length - 1]?.revenue?.toFixed(0)}M, Net Income ${chartData[chartData.length - 1]?.netIncome?.toFixed(0)}M
       </div>
     </div>
   );

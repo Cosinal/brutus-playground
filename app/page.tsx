@@ -18,8 +18,10 @@ import {
   GrowthAISCvsRealizedChart,
   GrowthRevenueAndFCFChart,
   GrowthMarketComparisonChart,
+  GrowthSECFinancialsChart,
 } from "@/components/Charts";
-import { companyInfo, dataSources } from "@/data/eldorado-data";
+import { company, dataSources } from "@/data/company-data";
+import { companyInfo } from "@/data/packs/eldorado-operations";
 import { BoardMode } from "@/lib/chat-parser";
 
 interface ChartConfig {
@@ -29,47 +31,82 @@ interface ChartConfig {
   props?: Record<string, any>;
 }
 
-const defaultCharts: ChartConfig[] = [
-  { id: "production", component: ProductionByMineChart, visible: true },
-  { id: "aisc", component: AISCvsGoldChart, visible: true },
-  { id: "mix", component: AssetMixChart, visible: true },
-  { id: "ramp", component: RampTimelineChart, visible: true },
-  { id: "price", component: ELDvsGoldChart, visible: true },
-];
+// Build chart configurations based on company capabilities
+const buildDefaultCharts = (): ChartConfig[] => {
+  const charts: ChartConfig[] = [];
+  
+  // Operations-specific charts (only if company has mining operations pack)
+  if (company.hasMiningOperationsPack) {
+    charts.push(
+      { id: "production", component: ProductionByMineChart, visible: true },
+      { id: "aisc", component: AISCvsGoldChart, visible: true },
+      { id: "mix", component: AssetMixChart, visible: true },
+      { id: "ramp", component: RampTimelineChart, visible: true }
+    );
+  }
+  
+  // Always include market chart (available for all companies with tickers)
+  charts.push({ id: "price", component: ELDvsGoldChart, visible: true });
+  
+  return charts;
+};
 
-const profitabilityCharts: ChartConfig[] = [
-  { id: "profitability-company", component: ProfitabilityCompanyChart, visible: true },
-  { id: "profitability-fcf", component: ProfitabilityFCFChart, visible: true },
-  { id: "profitability-mine", component: ProfitabilityByMineChart, visible: true },
-  { id: "profitability-metal", component: ProfitabilityByMetalChart, visible: true },
-  { id: "profitability-revenue", component: ProfitabilityRevenueChart, visible: true },
-];
+const buildProfitabilityCharts = (): ChartConfig[] => {
+  const charts: ChartConfig[] = [];
+  
+  // Profitability charts only available with mining operations pack
+  if (company.hasMiningOperationsPack) {
+    charts.push(
+      { id: "profitability-company", component: ProfitabilityCompanyChart, visible: true },
+      { id: "profitability-fcf", component: ProfitabilityFCFChart, visible: true },
+      { id: "profitability-mine", component: ProfitabilityByMineChart, visible: true },
+      { id: "profitability-metal", component: ProfitabilityByMetalChart, visible: true },
+      { id: "profitability-revenue", component: ProfitabilityRevenueChart, visible: true }
+    );
+  }
+  
+  return charts;
+};
 
-const growthCharts: ChartConfig[] = [
-  { id: "growth-production", component: GrowthProductionByMineChart, visible: true },
-  { id: "growth-annual", component: GrowthAnnualProductionChart, visible: true },
-  { id: "growth-aisc", component: GrowthAISCvsRealizedChart, visible: true },
-  { id: "growth-revenue-fcf", component: GrowthRevenueAndFCFChart, visible: true },
-  { id: "growth-market", component: GrowthMarketComparisonChart, visible: true },
-];
+const buildGrowthCharts = (): ChartConfig[] => {
+  const charts: ChartConfig[] = [];
+  
+  // Growth charts: operations-specific ones only if pack available
+  if (company.hasMiningOperationsPack) {
+    charts.push(
+      { id: "growth-production", component: GrowthProductionByMineChart, visible: true },
+      { id: "growth-annual", component: GrowthAnnualProductionChart, visible: true },
+      { id: "growth-aisc", component: GrowthAISCvsRealizedChart, visible: true },
+      { id: "growth-revenue-fcf", component: GrowthRevenueAndFCFChart, visible: true }
+    );
+  }
+  
+  // Always include market comparison chart
+  charts.push({ id: "growth-market", component: GrowthMarketComparisonChart, visible: true });
+  
+  // Add SEC financials chart if available
+  charts.push({ id: "growth-sec-financials", component: GrowthSECFinancialsChart, visible: true });
+  
+  return charts;
+};
 
 export default function Home() {
   const [mode, setMode] = useState<BoardMode>("default");
-  const [charts, setCharts] = useState<ChartConfig[]>(defaultCharts);
+  const [charts, setCharts] = useState<ChartConfig[]>(buildDefaultCharts());
   const [filter, setFilter] = useState<string | null>(null);
 
   const handleChartAction = (action: any) => {
     if (action.type === "reset") {
       setMode("default");
-      setCharts(defaultCharts);
+      setCharts(buildDefaultCharts());
       setFilter(null);
     } else if (action.type === "switch_mode") {
       setMode(action.mode);
       if (action.mode === "profitability") {
-        setCharts(profitabilityCharts);
+        setCharts(buildProfitabilityCharts());
         setFilter(null);
       } else if (action.mode === "growth") {
-        setCharts(growthCharts);
+        setCharts(buildGrowthCharts());
         setFilter(null);
       }
     } else if (action.type === "filter") {
@@ -82,7 +119,7 @@ export default function Home() {
       );
     } else if (action.type === "add") {
       const chartExists = charts.some((c) => c.id === action.target);
-      if (!chartExists && action.target === "production") {
+      if (!chartExists && action.target === "production" && company.hasMiningOperationsPack) {
         setCharts((prev) => [
           ...prev,
           { id: "production", component: ProductionByMineChart, visible: true },
@@ -96,9 +133,56 @@ export default function Home() {
   const visibleCharts = charts.filter((c) => c.visible);
 
   const getModeTitle = () => {
-    if (mode === "profitability") return "Profitability — Q2 2026";
-    if (mode === "growth") return "Growth — Sourced History";
-    return "Eldorado Gold Dashboard";
+    if (mode === "profitability") return `${company.shortName} Profitability`;
+    if (mode === "growth") return `${company.shortName} Growth`;
+    return `${company.shortName} Dashboard`;
+  };
+
+  const getHeaderStats = () => {
+    if (!company.hasMiningOperationsPack) {
+      return (
+        <div className="text-xs sm:text-sm text-zinc-400">
+          <span>{company.sector} • {company.industry}</span>
+        </div>
+      );
+    }
+    
+    // Eldorado-specific stats (when operations pack exists)
+    if (mode === "default") {
+      return (
+        <div className="text-xs sm:text-sm text-zinc-400 flex flex-wrap gap-3">
+          <span>H1 2026: {companyInfo.h1_2026_production}</span>
+          <span>AISC: {companyInfo.q2_2026_aisc}</span>
+        </div>
+      );
+    } else if (mode === "profitability") {
+      return (
+        <div className="text-xs sm:text-sm text-zinc-400 flex flex-wrap gap-3">
+          <span>Realized: $4,379/oz</span>
+          <span>AISC: $1,926/oz</span>
+          <span>Margin: $2,453/oz</span>
+        </div>
+      );
+    } else if (mode === "growth") {
+      return (
+        <div className="text-xs sm:text-sm text-zinc-400 flex flex-wrap gap-3">
+          <span>Q1 2025–Q2 2026</span>
+          <span>FY 2025: 488 koz</span>
+          <span>FY 2026 Guidance: 495–600 koz</span>
+        </div>
+      );
+    }
+  };
+
+  const getFooterOperations = () => {
+    if (company.hasMiningOperationsPack) {
+      return (
+        <p className="text-xs">
+          Operations: {companyInfo.operations.join(", ")}
+        </p>
+      );
+    }
+    return null;
   };
 
   return (
@@ -109,31 +193,10 @@ export default function Home() {
             <div>
               <h1 className="text-xl sm:text-2xl font-bold">{getModeTitle()}</h1>
               <div className="text-xs text-zinc-500 mt-1">
-                {mode === "default" ? `${companyInfo.tickers} | As of ${dataSources.asOf}` : `Source: ${dataSources.sources[0]}`}
+                {Object.values(company.tickers).filter(t => t).join(" / ")} | As of {dataSources.asOf}
               </div>
             </div>
-            <div className="text-xs sm:text-sm text-zinc-400 flex flex-wrap gap-3">
-              {mode === "default" && (
-                <>
-                  <span>H1 2026: {companyInfo.h1_2026_production}</span>
-                  <span>AISC: {companyInfo.q2_2026_aisc}</span>
-                </>
-              )}
-              {mode === "profitability" && (
-                <>
-                  <span>Realized: $4,379/oz</span>
-                  <span>AISC: $1,926/oz</span>
-                  <span>Margin: $2,453/oz</span>
-                </>
-              )}
-              {mode === "growth" && (
-                <>
-                  <span>Q1 2025–Q2 2026</span>
-                  <span>FY 2025: 488 koz</span>
-                  <span>FY 2026 Guidance: 495–600 koz</span>
-                </>
-              )}
-            </div>
+            {getHeaderStats()}
           </div>
         </div>
       </header>
@@ -172,11 +235,12 @@ export default function Home() {
             <p className="text-xs">
               Data sources: {dataSources.sources.join(" • ")}
             </p>
+            {getFooterOperations()}
             <p className="text-xs">
-              Operations: {companyInfo.operations.join(", ")}
+              Live at: <a href="https://brutus-playground-xrz5.vercel.app" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300">brutus-playground-xrz5.vercel.app</a>
             </p>
             <p className="text-xs text-zinc-600">
-              Portfolio piece using public data only. Not investment advice.
+              Plug-and-play public company dashboard kit. Not investment advice.
             </p>
           </div>
         </div>

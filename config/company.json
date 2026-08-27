@@ -1,0 +1,41 @@
+{
+  "name": "Eldorado Gold Corporation",
+  "shortName": "Eldorado Gold",
+  "headquarters": "Vancouver, Canada",
+  "tickers": {
+    "primary": "ELD.TO",
+    "secondary": "EGO",
+    "benchmark": "GC=F"
+  },
+  "tickerDetails": {
+    "ELD.TO": {
+      "exchange": "TSX",
+      "currency": "CAD",
+      "description": "Toronto Stock Exchange listing"
+    },
+    "EGO": {
+      "exchange": "NYSE",
+      "currency": "USD",
+      "description": "New York Stock Exchange listing"
+    },
+    "GC=F": {
+      "exchange": "COMEX",
+      "currency": "USD",
+      "description": "Gold futures (USD per troy ounce)"
+    }
+  },
+  "cik": "0000918608",
+  "sector": "Materials",
+  "industry": "Gold Mining",
+  "hasMiningOperationsPack": true,
+  "asOf": "2026-08-27",
+  "sources": [
+    "Eldorado Gold Q2 2026 News Release (2026-07-30)",
+    "Q2 2026 MD&A filed on SEDAR+ and SEC EDGAR",
+    "SEC EDGAR CIK 0000918608 company facts (XBRL)",
+    "Yahoo Finance v8 chart API (market data)"
+  ],
+  "description": "Eldorado Gold is a gold and base metals producer with mining, development and exploration operations in Türkiye, Canada, Greece and Romania.",
+  "fiscalYearEnd": "12-31",
+  "website": "https://www.eldoradogold.com"
+}

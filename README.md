@@ -1,57 +1,134 @@
-# Eldorado Gold Investment Dashboard
+# Public Company Dashboard Kit
 
 **By Jorden Shaw**
 
 **Live Dashboard:** https://brutus-playground-xrz5.vercel.app
 
-A conversational investment decision dashboard for Eldorado Gold Corporation (TSX: ELD, NYSE: EGO) with **sourced historical data** and **growth/time-horizon analysis**.
+A plug-and-play dashboard framework for public companies with automatic market data and financial metrics. Eldorado Gold Corporation (TSX: ELD, NYSE: EGO) is the reference implementation.
 
-## Investment Thesis
+## What Is This?
 
-Eldorado Gold is executing a multi-asset transformation in 2026. **Skouries** (Greece) targets first copper-gold concentrate in Q3 2026 and commercial production Q4 2026, unlocking a major polymetallic asset. **McIlvenna Bay** (Canada) achieved first copper in June 2026 and first zinc in July 2026, ramping toward 2,750 tpd. These projects shift the company from a pure gold producer to a copper-exposed polymetallic miner. 
+A Next.js dashboard that can display any public company's:
+- **Market history** (Yahoo Finance, any ticker, any range/interval)
+- **Standard financials** (SEC EDGAR company facts API for US filers)
+- **Optional company-specific operations pack** (manually sourced metrics like mine production, AISC, project ramps)
 
-**The tension**: Q2 2026 AISC rose to $1,926/oz (vs. Q1 2025 $1,559/oz), driven by Olympias' high costs and Skouries pre-commercial spending. H1 2026 production of 204,974 oz tracks toward FY 2026 guidance of 495–600 koz, but the story is back-half weighted. **The decision point**: if Skouries and McIlvenna Bay ramp on schedule and costs compress below $1,800/oz by Q1 2027, the asset base transforms. If costs stay elevated or ramps slip, margin compression at gold prices above $4,000/oz becomes a concern. This dashboard tracks the ramp, cost, and production data that drive the 2027 investment decision.
+Eldorado Gold includes a full mining operations pack with sourced quarterly production, AISC, profitability, and project ramp data. Other companies start with market + SEC data only.
+
+## Quick Start — Use Eldorado Data
+
+```bash
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+The dashboard loads with Eldorado's real Yahoo Finance 5-year market history and existing operations pack.
+
+## Plug-and-Play — Point at Another Company
+
+### 1. Edit `config/company.json`
+
+```json
+{
+  "name": "Example Corp",
+  "shortName": "Example",
+  "headquarters": "City, Country",
+  "tickers": {
+    "primary": "EXPL",
+    "secondary": null,
+    "benchmark": "^GSPC"
+  },
+  "tickerDetails": {
+    "EXPL": {
+      "exchange": "NYSE",
+      "currency": "USD",
+      "description": "New York Stock Exchange"
+    },
+    "^GSPC": {
+      "exchange": "INDEX",
+      "currency": "USD",
+      "description": "S&P 500 Index"
+    }
+  },
+  "cik": "0001234567",
+  "sector": "Technology",
+  "industry": "Software",
+  "hasMiningOperationsPack": false,
+  "asOf": "2026-08-27",
+  "sources": [
+    "SEC EDGAR CIK 0001234567",
+    "Yahoo Finance v8 chart API"
+  ],
+  "description": "Company description",
+  "fiscalYearEnd": "12-31",
+  "website": "https://example.com"
+}
+```
+
+### 2. Fetch Market Data
+
+```bash
+python scripts/fetch-yahoo-market.py
+```
+
+This reads `config/company.json` and fetches all tickers (primary, secondary, benchmark) from Yahoo Finance. Writes `data/yahoo-market.json`.
+
+**Arguments:**
+- `--config PATH` — Path to config (default: `config/company.json`)
+- `--range 5y` — Time range: `1y`, `5y`, `max`, etc.
+- `--interval 1mo` — Interval: `1d`, `1wk`, `1mo`
+- `--tickers TICK1 TICK2` — Override config tickers
+
+**Example:**
+```bash
+python scripts/fetch-yahoo-market.py --range 5y --interval 1mo
+```
+
+### 3. Fetch SEC Financials (if CIK exists)
+
+```bash
+python scripts/fetch-sec-financials.py
+```
+
+Fetches annual (10-K) standard metrics from SEC EDGAR company facts API:
+- Revenues
+- Net Income (Loss)
+- Operating Cash Flow
+- Free Cash Flow (if tagged)
+
+Writes `data/sec-financials.json`. Only works for US SEC filers with a CIK. Canadian-only filers: skip this step.
+
+**Note:** SEC API may be blocked from some VMs (403). Run from a local machine if needed.
+
+### 4. Build and Run
+
+```bash
+npm run build
+npm start
+```
+
+The dashboard now shows your company's market history. Operations-specific charts (production, AISC, profitability) are hidden unless you create a company pack.
+
+## Advanced — Create a Company Operations Pack
+
+If your company is a miner or has industry-specific metrics not available through standard APIs, create a company-specific pack like Eldorado's.
+
+1. Create `data/packs/yourcompany-operations.ts`
+2. Define interfaces and export sourced data (production, costs, projects, etc.)
+3. Update `components/Charts.tsx` to import your pack
+4. Set `"hasMiningOperationsPack": true` in `config/company.json`
+
+See `data/packs/eldorado-operations.ts` as a reference. This is **manual sourcing** from company filings — not automated.
 
 ## Features
 
-- **Default board (5 charts)**: Production by mine, AISC vs realized gold, asset mix, ramp timeline, market data placeholder
-- **Profitability mode**: Ask "profitability" or "show profitability" to rebuild the board around Q2 2026 margins, FCF, mine-level costs, and revenue splits
-- **Growth / historical mode** *(NEW)*: Ask "growth", "historical growth", "over time", or "show history" to view sourced time-series data across quarters and years
-- **Conversational interface**: Filter (e.g., "Just Lamaque"), modify chart types, add/remove visuals, or ask investment questions
-- **Investment-grade responses**: The chat can answer questions like "Does Skouries slipping a quarter change the 2027 story?" with judgment-driven analysis
-- **Real public data only**: All figures sourced from Eldorado Gold news releases, SEDAR+/SEC filings, and public market sources. **No invented numbers**.
-- **Mobile-usable**: Responsive design works on tablet and phone
-- **Dark finance aesthetic**: Clean, readable charts with a professional dark theme
-
-## Growth Mode — Historical Data
-
-The **growth mode** shows Eldorado's operating history and time-horizon trends:
-
-### What's Included (Sourced Data)
-
-- **Quarterly production by mine**: Q1 2025 through Q2 2026 (6 quarters) from Eldorado Gold quarterly reports
-  - Exact ounces (not rounded koz) to match filings
-  - Lamaque, Kışladağ, Efemçukuru, Olympias
-  - Skouries and McIlvenna Bay at zero until commercial production reported
-- **Annual production**: FY 2025 actual (488,268 oz) and FY 2026 guidance (495–600 koz midpoint shown)
-- **AISC vs realized gold price**: Q1 2025 through Q2 2026 where disclosed
-  - Q3 2025 and Q4 2025 AISC available; realized gold price omitted (not disclosed in public filings)
-- **Revenue and FCF**: Q1 2025 through Q2 2026 where disclosed
-  - Q2 2026 FCF breakdown: Total -$334.1M, Operating mines (ex-growth) +$40.9M
-  - Note: FCF-ex definition changed Q2 2026 to exclude both Skouries and McIlvenna Bay
-- **Market comparison**: Placeholder for EGO (NYSE), ELD.TO (TSX), and gold futures (GC=F)
-  - Current close 2026-08-26: ELD.TO CAD 65.19, EGO USD 46.96
-  - Live data requires Yahoo Finance v8 chart API or Stooq CSV import
-
-### What's NOT Included (Unavailable or Uninvented)
-
-- **Q3/Q4 2026 projected production**: Not sourced; no invented estimates
-- **Quarterly realized gold prices before Q1 2025**: Not disclosed in public MD&As reviewed
-- **EBITDA and Net Income time series**: Only Q2 2026 available in sourced data
-- **Historical market price series**: Yahoo/Stooq API integration blocked by rate limits; static snapshot not yet implemented
-- **Annual production before 2025**: Not yet sourced from earlier Eldorado reports (can be added from performance-and-guidance page or annual NRs)
-
-Ask "last 8 quarters", "annual only", or "vs gold" in growth mode to filter time horizons. If you ask for a period we don't have, the dashboard will tell you.
+- **Default board**: Market history + operations (if pack exists)
+- **Profitability mode**: Margins, FCF, mine-level costs (if pack exists)
+- **Growth mode**: Historical time-series production, AISC, revenue/FCF (if pack exists)
+- **Conversational chat**: Pattern-based intent parser (no LLM API keys required)
+- **Responsive design**: Works on desktop, tablet, mobile
 
 ## Tech Stack
 
@@ -59,61 +136,153 @@ Ask "last 8 quarters", "annual only", or "vs gold" in growth mode to filter time
 - **React 18** with TypeScript
 - **Recharts** for data visualization
 - **Tailwind CSS** for styling
-- **Rule-based intent parser**: Chat works without LLM API keys; uses pattern matching and templated responses to mutate charts and answer investment questions
+- **Python 3** for data fetch scripts (stdlib only, no dependencies)
 
-## Installation
+## Project Structure
 
-```bash
-npm install
+```
+/config
+  company.json              # Active company configuration
+
+/scripts
+  fetch-yahoo-market.py     # Fetch market data from Yahoo Finance
+  fetch-sec-financials.py   # Fetch financials from SEC EDGAR
+
+/data
+  company-data.ts           # General company data module (config + market + SEC)
+  yahoo-market.json         # Market history (fetched)
+  sec-financials.json       # SEC metrics (fetched)
+  /packs
+    eldorado-operations.ts  # Eldorado-specific mining ops pack (sourced)
+
+/components
+  Charts.tsx                # All chart components
+  ChatPanel.tsx             # Chat interface
+
+/app
+  page.tsx                  # Main dashboard (conditionally renders ops charts)
+  layout.tsx                # Root layout
+
+/lib
+  chat-parser.ts            # Intent parser for chat commands
 ```
 
-## Development
+## Data Sources
+
+### General (All Companies)
+
+**Market Data:**
+- **Yahoo Finance v8 chart API**: Automatic for any ticker
+- Range: Configurable (default 5 years)
+- Interval: Configurable (default monthly)
+- Currencies preserved as reported
+- Indexed to 100 at first non-null close for relative performance
+
+**Financials:**
+- **SEC EDGAR company facts API**: Annual (10-K) standard metrics for US filers
+- Revenues, Net Income, Operating Cash Flow, Free Cash Flow (if tagged)
+- Only available if company has a CIK (US SEC registration)
+
+### Eldorado Gold (Reference Implementation)
+
+Eldorado's dashboard includes a full **mining operations pack** with sourced data from public filings:
+
+**Company Disclosures:**
+- Eldorado Gold Q2 2026 News Release (2026-07-30)
+- Q2 2026 MD&A filed on SEDAR+ and SEC EDGAR
+- Q1 2026, Q4 2025, Q3 2025, Q2 2025, Q1 2025 quarterly reports
+- Performance and Guidance at a Glance: [eldoradogold.com](https://www.eldoradogold.com/assets/performance-and-guidance-at-a-glance)
+
+**Market Data:**
+- Fetched: 2026-08-27
+- Tickers: ELD.TO (TSX, CAD), EGO (NYSE, USD), GC=F (COMEX gold futures, USD/oz)
+- Range: September 2021–August 2026 (~61 monthly closes)
+- Gold futures have fewer data points (~53) due to contract rollover
+
+**Operations Pack:**
+- **Production**: Quarterly by mine (Lamaque, Kışladağ, Efemçukuru, Olympias)
+- **AISC & Realized Gold**: Q1 2025–Q2 2026
+- **Revenue & FCF**: Operating vs growth projects
+- **Project Ramps**: Skouries and McIlvenna Bay milestones
+- **Profitability**: Mine-level costs, metal revenue splits
+
+All Eldorado operational data is manually sourced from company filings. Not available through standard APIs.
+
+### Refreshing Eldorado Data
 
 ```bash
-npm run dev
-```
+# Refresh market data (Yahoo Finance)
+python scripts/fetch-yahoo-market.py
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+# Refresh SEC financials (if accessible)
+python scripts/fetch-sec-financials.py
 
-## Build for Production
-
-```bash
+# Rebuild and deploy
 npm run build
-npm start
 ```
+
+**Note:** Operations pack data (production, AISC, etc.) must be updated manually by editing `data/packs/eldorado-operations.ts`.
+
+## Investment Thesis — Eldorado Gold
+
+Eldorado Gold is executing a multi-asset transformation in 2026. **Skouries** (Greece) targets first copper-gold concentrate in Q3 2026 and commercial production Q4 2026, unlocking a major polymetallic asset. **McIlvenna Bay** (Canada) achieved first copper in June 2026, with commercial production expected Q3 2026, ramping toward nameplate 4,900 tpd (June 8, 2026 NR).
+
+**The tension**: Q2 2026 AISC rose to $1,926/oz (vs. Q1 2025 $1,559/oz), driven by Olympias' high costs and Skouries pre-commercial spending. H1 2026 production of 204,974 oz tracks toward FY 2026 guidance of 495–600 koz.
+
+**The decision point**: If Skouries and McIlvenna Bay ramp on schedule and costs compress below $1,800/oz by Q1 2027, the asset base transforms. If costs stay elevated, margin compression becomes a concern even at gold above $4,000/oz.
+
+This dashboard tracks the ramp, cost, and production data that drive the 2027 investment decision.
 
 ## Chat Examples
 
 Try these commands in the chat panel:
 
 ### Mode Switching
-- **"profitability"** – Switch to profitability mode (margins, FCF, mine costs)
-- **"growth"** or **"historical growth"** – Switch to growth mode (time-series production, AISC trends, revenue/FCF)
-- **"reset"** – Return to default 5-chart dashboard
+- **"profitability"** – Margins, FCF, mine-level costs
+- **"growth"** or **"historical growth"** – Time-series production, AISC, revenue/FCF
+- **"reset"** – Return to default dashboard
 
 ### Filters and Modifications
-- **"Just Lamaque"** – Filter to Lamaque mine data
-- **"Show AISC as a bar chart"** – Switch AISC to bar chart by mine
-- **"Remove the price chart"** – Hide the market price chart
+- **"Just Lamaque"** – Filter to Lamaque mine
+- **"Show AISC as a bar chart"** – Switch chart type
+- **"Remove the price chart"** – Hide market chart
 
-### Investment Questions
-- **"What was Q2 2026 AISC?"** – Get specific data points
-- **"Does Skouries slipping a quarter change the 2027 story?"** – Investment analysis
+### Investment Questions (Eldorado)
+- **"What was Q2 2026 AISC?"**
+- **"Does Skouries slipping a quarter change the 2027 story?"**
 
-## Data Sources
+## Constraints
 
-All data is from public sources as of **2026-08-26**:
+- **Public data only**: No paid APIs, no proprietary data
+- **No invented numbers**: Missing data stays null
+- **No FX conversion**: Currencies preserved as reported
+- **Python stdlib only**: Fetch scripts use `urllib`, no external dependencies
+- **SEC rate limiting**: Scripts include 100ms delay between requests
 
-### Company Disclosures
-- **Eldorado Gold Q2 2026 News Release** (2026-07-30): [eldoradogold.com](https://www.eldoradogold.com/investors/news-releases/)
-- **Q2 2026 MD&A** filed on SEDAR+ (Canada) and SEC EDGAR (USA)
-- **Q1 2026, Q4 2025, Q3 2025, Q2 2025, Q1 2025** quarterly reports and MD&As
-- **Performance and Guidance at a Glance**: [eldoradogold.com/assets/performance-and-guidance-at-a-glance](https://www.eldoradogold.com/assets/performance-and-guidance-at-a-glance)
+## Operations Pack Notes
 
-### Market Data
-- **Yahoo Finance**: ELD.TO (TSX, CAD) and EGO (NYSE, USD) as of 2026-08-26
-- **Market close 2026-08-26**: ELD.TO CAD 65.19, EGO USD 46.96
-- **52-week ranges**: ELD.TO CAD 32.77–69.46, EGO USD 23.81–51.16
+Mine-level AISC, production by mine, and project ramps are **not standard XBRL fields**. These require manual sourcing from:
+- Quarterly MD&As
+- News releases
+- Investor presentations
+- Performance snapshots
+
+If you want these for another mining company, create a company-specific pack following `data/packs/eldorado-operations.ts` as a template.
+
+## Notes
+
+This is a portfolio piece built by Jorden Shaw to demonstrate:
+- Plug-and-play data architecture for public companies
+- Modern web development with Next.js and TypeScript
+- Financial data visualization and UX design
+- Conversational interfaces without LLM dependencies
+- Data sourcing discipline: no invented numbers, blanks stay blank
+
+**Not investment advice.** This dashboard presents public data for educational and analytical purposes.
+
+---
+
+**Built in August 2026** | **Live at [brutus-playground-xrz5.vercel.app](https://brutus-playground-xrz5.vercel.app)** | [GitHub Repository](https://github.com/Cosinal/brutus-playground)
 
 ### Key Sourced Figures (Q2 2026)
 - **Production**: Lamaque 52,340 oz, Kışladağ 19,108 oz, Efemçukuru 18,019 oz, Olympias 15,125 oz (total 104,616 oz)

@@ -1,8 +1,6 @@
-export interface PriceData {
-  date: string;
-  eldPrice: number;
-  goldPrice: number;
-}
+// Eldorado Gold Corporation - Mining Operations Pack
+// Sourced operational data specific to Eldorado's mining operations
+// Not available through standard APIs - manually sourced from company filings
 
 export interface ProductionByMineData {
   quarter: string;
@@ -50,67 +48,59 @@ export interface RevenueAndFCFData {
   note?: string;
 }
 
-export interface MarketPriceData {
-  date: string;
-  EGO: number | null;
-  ELD_TO: number | null;
-  gold: number | null;
+export interface ProfitabilityCompanyData {
+  period: string;
+  revenue: number; // $M USD
+  realizedGold: number | null; // $/oz
+  tcc: number | null; // $/oz Total Cash Cost
+  aisc: number; // $/oz All-In Sustaining Cost
+  adjEbitda: number | null; // $M USD
+  netIncome: number | null; // $M USD
+  fcf: number | null; // $M USD Free Cash Flow
+  fcfExGrowth: number | null; // $M USD FCF excluding Skouries + McIlvenna Bay
 }
 
-export const dataSources = {
-  asOf: "2026-08-27",
+export interface ProfitabilityMineData {
+  mine: string;
+  country: string;
+  q2_2026_production_oz: number;
+  tcc: number | null; // $/oz
+  aisc: number; // $/oz
+}
+
+export interface ProfitabilityMetalData {
+  period: string;
+  goldRevenue: number | null; // $M USD
+  otherRevenue: number | null; // $M USD (copper, zinc, silver)
+  totalRevenue: number; // $M USD
+}
+
+export interface ProfitabilitySegmentData {
+  period: string;
+  segment: string;
+  fcf: number | null; // $M USD
+}
+
+// Data sources for Eldorado operations pack
+export const eldoradoDataSources = {
+  asOf: "2026-08-26",
   sources: [
     "Eldorado Gold Q2 2026 News Release (2026-07-30)",
     "Q2 2026 MD&A filed on SEDAR+ and SEC EDGAR",
     "Q1 2026, Q4 2025, and earlier quarterly reports",
     "Performance and Guidance at a Glance (eldoradogold.com)",
-    "Market data: Yahoo Finance v8 chart API, 5y monthly, fetched 2026-08-27",
-    "McIlvenna Bay First Concentrate News Release (2026-06-08, GlobeNewswire)",
+    "McIlvenna Bay First Concentrate News Release (2026-06-08)",
   ],
   notes: [
     "All production figures in ounces (not koz) to preserve filing accuracy",
     "AISC and realized gold price in USD per ounce",
     "Skouries first concentrate EXPECTED Q3 2026 (not reported as of 2026-07-30)",
     "McIlvenna Bay first copper 2026-06-07, commercial production EXPECTED Q3 2026",
-    "McIlvenna Bay ramp toward nameplate 4,900 tpd (June 8, 2026 NR)",
+    "McIlvenna Bay nameplate capacity 4,900 tpd (June 8, 2026 NR)",
     "FCF-ex definition changed Q2 2026 to exclude both Skouries and McIlvenna Bay",
     "Blanks indicate data not disclosed in public filings",
-    "Market data: EGO (NYSE, USD), ELD.TO (TSX, CAD), GC=F (COMEX gold futures, USD/oz)",
   ],
 };
-
-// Market price data for growth/time horizon views
-// Source: Yahoo Finance v8 chart API
-// Range: 5 years, monthly interval
-// Fetched: 2026-08-27
-// Currency: EGO USD, ELD.TO CAD, gold USD/oz
-// Note: Gold futures have fewer monthly closes (~53) than equities (~61)
-// Import raw data and convert to indexed series (100 at first non-null)
-import yahooMarketJson from "./yahoo-market.json";
-
-function indexMarketData(series: any[]): MarketPriceData[] {
-  // Find first non-null values for each ticker to use as base (index 100)
-  let egoBase: number | null = null;
-  let eldBase: number | null = null;
-  let goldBase: number | null = null;
-
-  for (const row of series) {
-    if (egoBase === null && row.EGO !== null) egoBase = row.EGO;
-    if (eldBase === null && row.ELD_TO !== null) eldBase = row.ELD_TO;
-    if (goldBase === null && row.gold !== null) goldBase = row.gold;
-    if (egoBase !== null && eldBase !== null && goldBase !== null) break;
-  }
-
-  // Convert to indexed series
-  return series.map(row => ({
-    date: row.date,
-    EGO: row.EGO !== null && egoBase !== null ? (row.EGO / egoBase) * 100 : null,
-    ELD_TO: row.ELD_TO !== null && eldBase !== null ? (row.ELD_TO / eldBase) * 100 : null,
-    gold: row.gold !== null && goldBase !== null ? (row.gold / goldBase) * 100 : null,
-  }));
-}
-
-export const marketPriceData: MarketPriceData[] = indexMarketData(yahooMarketJson.series);
 
 // Production by Mine (ounces, not koz)
 // Source: Eldorado Gold Q2 2026 MD&A and quarterly reports
@@ -158,9 +148,9 @@ export const revenueAndFCF: RevenueAndFCFData[] = [
 ];
 
 // Chart 4: Skouries & McIlvenna Bay Ramp Timeline
-// Source: Eldorado Gold project updates and quarterly reports
+// Source: Eldorado Gold news releases and project updates
 // As of: August 2026
-// McIlvenna Bay ramp: June 8, 2026 NR (first concentrate, nameplate 4,900 tpd, Q3 commercial production)
+// McIlvenna Bay source: June 8, 2026 news release (first concentrate)
 export const rampTimeline: RampData[] = [
   {
     project: "Skouries",
@@ -200,7 +190,7 @@ export const rampTimeline: RampData[] = [
   {
     project: "McIlvenna Bay",
     milestone: "Ramp toward nameplate 4,900 tpd",
-    planned: "ramp-up (nameplate)",
+    planned: "Ongoing",
     actual: null,
     status: "on-track",
   },
@@ -220,39 +210,6 @@ export const assetMix: AssetMixData[] = [
 // Profitability Data
 // Source: Eldorado Gold Q2 2026 Financial Results and MD&A
 // As of: Q2 2026
-
-export interface ProfitabilityCompanyData {
-  period: string;
-  revenue: number; // $M USD
-  realizedGold: number | null; // $/oz
-  tcc: number | null; // $/oz Total Cash Cost
-  aisc: number; // $/oz All-In Sustaining Cost
-  adjEbitda: number | null; // $M USD
-  netIncome: number | null; // $M USD
-  fcf: number | null; // $M USD Free Cash Flow
-  fcfExGrowth: number | null; // $M USD FCF excluding Skouries + McIlvenna Bay
-}
-
-export interface ProfitabilityMineData {
-  mine: string;
-  country: string;
-  q2_2026_production_oz: number;
-  tcc: number | null; // $/oz
-  aisc: number; // $/oz
-}
-
-export interface ProfitabilityMetalData {
-  period: string;
-  goldRevenue: number | null; // $M USD
-  otherRevenue: number | null; // $M USD (copper, zinc, silver)
-  totalRevenue: number; // $M USD
-}
-
-export interface ProfitabilitySegmentData {
-  period: string;
-  segment: string;
-  fcf: number | null; // $M USD
-}
 
 export const profitabilityCompany: ProfitabilityCompanyData[] = [
   { period: "Q1 2025", revenue: 355.2, realizedGold: 2933, tcc: null, aisc: 1559, adjEbitda: null, netIncome: null, fcf: -29.4, fcfExGrowth: null },
