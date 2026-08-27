@@ -89,12 +89,14 @@ export const eldoradoDataSources = {
     "Q2 2026 MD&A filed on SEDAR+ and SEC EDGAR",
     "Q1 2026, Q4 2025, and earlier quarterly reports",
     "Performance and Guidance at a Glance (eldoradogold.com)",
+    "McIlvenna Bay First Concentrate News Release (2026-06-08)",
   ],
   notes: [
     "All production figures in ounces (not koz) to preserve filing accuracy",
     "AISC and realized gold price in USD per ounce",
     "Skouries first concentrate EXPECTED Q3 2026 (not reported as of 2026-07-30)",
     "McIlvenna Bay first copper 2026-06-07, commercial production EXPECTED Q3 2026",
+    "McIlvenna Bay nameplate capacity 4,900 tpd (June 8, 2026 NR)",
     "FCF-ex definition changed Q2 2026 to exclude both Skouries and McIlvenna Bay",
     "Blanks indicate data not disclosed in public filings",
   ],
@@ -146,8 +148,9 @@ export const revenueAndFCF: RevenueAndFCFData[] = [
 ];
 
 // Chart 4: Skouries & McIlvenna Bay Ramp Timeline
-// Source: Eldorado Gold project updates and quarterly reports
+// Source: Eldorado Gold news releases and project updates
 // As of: August 2026
+// McIlvenna Bay source: June 8, 2026 news release (first concentrate)
 export const rampTimeline: RampData[] = [
   {
     project: "Skouries",
@@ -179,8 +182,15 @@ export const rampTimeline: RampData[] = [
   },
   {
     project: "McIlvenna Bay",
-    milestone: "Ramp to 2,750 tpd",
-    planned: "H2 2026",
+    milestone: "Commercial production",
+    planned: "Q3 2026",
+    actual: null,
+    status: "on-track",
+  },
+  {
+    project: "McIlvenna Bay",
+    milestone: "Ramp toward nameplate 4,900 tpd",
+    planned: "Ongoing",
     actual: null,
     status: "on-track",
   },
